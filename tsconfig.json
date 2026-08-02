@@ -2,6 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "types": ["bun"],
+    "esModuleInterop": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }
