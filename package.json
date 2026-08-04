@@ -7,8 +7,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.0",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.33",
+    "hono": "^4.13.0",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
