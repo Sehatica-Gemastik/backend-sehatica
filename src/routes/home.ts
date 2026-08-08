@@ -4,7 +4,7 @@ import { medicalRecords, schedules, verifRequests, chatMessages, dailyInsights }
 import { eq, desc, and } from 'drizzle-orm';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
-import { generateDailyInsight } from '../services/gemini';
+import { generateDailyInsight } from '../services/ai';
 
 const home = new Hono();
 

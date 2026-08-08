@@ -4,7 +4,7 @@ import { schedules } from '../db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
-import { generateSchedule } from '../services/gemini';
+import { generateSchedule } from '../services/ai';
 
 const schedulesRoute = new Hono();
 

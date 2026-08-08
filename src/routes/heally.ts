@@ -5,7 +5,7 @@ import { eq, asc } from 'drizzle-orm';
 import { authMiddleware } from '../middlewares/auth';
 import { rateLimit } from '../middlewares/rate-limit';
 import { successResponse, errorResponse } from '../utils/response';
-import { chatWithHeally } from '../services/gemini';
+import { chatWithHeally } from '../services/ai';
 import { LlmRateLimitError } from '../services/llm/provider';
 import { llmConfig, isDummyLlm } from '../config/llm';
 import {

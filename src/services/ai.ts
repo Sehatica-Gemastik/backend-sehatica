@@ -1,8 +1,16 @@
-import { db } from '../db';
-import { medicalRecords, schedules, users } from '../db/schema';
-import { eq, desc } from 'drizzle-orm';
-import { getLlmProvider, dummyProvider, LlmRateLimitError, LlmAuthError } from './llm/provider';
 import { isDummyLlm, llmConfig, resolveActiveApiKey } from '../config/llm';
+import {
+  getLlmProvider,
+  dummyProvider,
+  LlmRateLimitError,
+  LlmAuthError,
+} from './llm/provider';
+import {
+  buildClinicalContext,
+  buildBehaviourContext,
+  getHeallySystemPrompt,
+  summarizeThinking,
+} from './heally/context';
 
 // ── Text generation via configurable LLM provider (default: dummy) ────────
 async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
@@ -10,14 +18,14 @@ async function generateText(prompt: string, systemInstruction?: string): Promise
   return result.text;
 }
 
-// ── Vision OCR — still Gemini when key present; dummy OCR otherwise ───────
+// ── Vision OCR — Gemini only; Groq/text providers use dummy OCR ───────────
 async function generateTextWithImage(prompt: string, imageBase64: string, mimeType = 'image/jpeg'): Promise<string> {
-  if (isDummyLlm() || !resolveActiveApiKey()) {
+  if (llmConfig.provider !== 'gemini' || isDummyLlm() || !resolveActiveApiKey()) {
     return JSON.stringify({
-      extractedText: '(dummy OCR) Teks dokumen tidak diekstrak — set LLM_PROVIDER=gemini + GEMINI_API_KEY.',
-      title: 'Dokumen Medis (dummy)',
-      summary: 'OCR dummy untuk local development.',
-      tags: ['Dokumen', 'Dummy'],
+      extractedText: '(OCR tidak tersedia) Provider saat ini tidak mendukung vision. Upload teks manual atau ganti ke Gemini untuk OCR.',
+      title: 'Dokumen Medis',
+      summary: 'Dokumen diunggah — OCR vision belum aktif untuk provider ini.',
+      tags: ['Dokumen'],
       recordType: 'image',
     });
   }
@@ -56,70 +64,6 @@ async function generateTextWithImage(prompt: string, imageBase64: string, mimeTy
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 }
 
-// ── Build user medical context for system prompt ───────────────────────────
-async function buildUserContext(userId: number): Promise<string> {
-  const [user, records, todaySchedules] = await Promise.all([
-    db.query.users.findFirst({ where: eq(users.id, userId) }),
-    db.query.medicalRecords.findMany({
-      where: eq(medicalRecords.userId, userId),
-      orderBy: [desc(medicalRecords.createdAt)],
-      limit: 5,
-    }),
-    db.query.schedules.findMany({
-      where: eq(schedules.userId, userId),
-      limit: 20,
-    }),
-  ]);
-
-  const recordsContext = records.map(r =>
-    `- [${r.type}] ${r.title} (${r.recordDate ?? r.createdAt.toLocaleDateString('id-ID')}): ${r.summary ?? r.content ?? 'No details'}`
-  ).join('\n');
-
-  const medicationsContext = todaySchedules
-    .filter(s => s.type === 'pill')
-    .map(s => `- ${s.label}: ${s.detail}`)
-    .join('\n');
-
-  const conditions = user?.conditions ?? 'Tidak diketahui';
-
-  return `
-KONTEKS PASIEN:
-Nama: ${user?.name ?? 'Pasien'}
-Kondisi Medis: ${conditions}
-Alergi: ${user?.allergies ?? 'Tidak ada'}
-
-REKAM MEDIS TERBARU (5 terakhir):
-${recordsContext || 'Belum ada rekam medis'}
-
-OBAT AKTIF:
-${medicationsContext || 'Tidak ada obat aktif'}
-`.trim();
-}
-
-// ── Heally System Prompt ───────────────────────────────────────────────────
-function getHeallySystemPrompt(userContext: string): string {
-  return `Kamu adalah Heally, asisten kesehatan AI dari aplikasi Sehatica yang cerdas, empatik, dan selalu membantu.
-
-${userContext}
-
-PANDUAN PENTING:
-1. Gunakan bahasa Indonesia yang ramah, jelas, dan mudah dipahami
-2. Selalu personalisasi respons berdasarkan rekam medis dan kondisi pasien di atas
-3. Untuk setiap saran medis yang spesifik (dosis obat, perubahan terapi, interpretasi hasil lab), WAJIB tambahkan:
-   ⚠️ *Saran ini dihasilkan AI dan perlu diverifikasi dokter sebelum diterapkan.*
-4. Jangan pernah menggantikan konsultasi dokter
-5. Format respons dengan markdown sederhana (bold, bullet points)
-6. Batasi respons maksimal 400 kata untuk kenyamanan membaca di mobile
-7. Untuk pertanyaan darurat medis, selalu arahkan ke IGD/dokter terdekat
-
-Saran medis kritis yang HARUS ditandai untuk verifikasi dokter:
-- Interaksi obat-obatan
-- Perubahan dosis atau jadwal obat
-- Interpretasi hasil laboratorium
-- Rekomendasi diet khusus untuk kondisi medis
-- Gejala yang memerlukan evaluasi medis`;
-}
-
 // ── Public API ─────────────────────────────────────────────────────────────
 
 /**
@@ -129,21 +73,31 @@ export async function chatWithHeally(
   userId: number,
   conversationHistory: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }>,
   userMessage: string
-): Promise<{ content: string; needsVerif: boolean; provider: string; model: string }> {
-  const userContext = await buildUserContext(userId);
-  const systemInstruction = getHeallySystemPrompt(userContext);
+): Promise<{
+  content: string;
+  needsVerif: boolean;
+  provider: string;
+  model: string;
+  thinkingSummary: string | null;
+  thinkingDetail: string | null;
+}> {
+  const [clinicalContext, behaviour] = await Promise.all([
+    buildClinicalContext(userId),
+    buildBehaviourContext(userId),
+  ]);
+  const systemInstruction = getHeallySystemPrompt(clinicalContext, behaviour.text);
   const llm = getLlmProvider();
 
   let result;
   try {
     result = await llm.generateChat(systemInstruction, conversationHistory, userMessage);
   } catch (err) {
-    if (llm.name === 'gemini' && (err instanceof LlmRateLimitError || err instanceof LlmAuthError)) {
+    if (llm.name !== 'dummy' && (err instanceof LlmRateLimitError || err instanceof LlmAuthError)) {
       const reason =
         err instanceof LlmAuthError
           ? err.message
-          : 'Kuota Gemini free tier penuh sementara. Tunggu ~1 menit lalu coba lagi.';
-      console.warn('[heally] Gemini unavailable —', reason);
+          : `Kuota ${llm.name} sementara penuh. Tunggu ~1 menit lalu coba lagi.`;
+      console.warn(`[heally] ${llm.name} unavailable —`, reason);
       const fallback = await dummyProvider.generateChat(
         systemInstruction,
         conversationHistory,
@@ -153,22 +107,42 @@ export async function chatWithHeally(
         text: `*${reason}*\n\n${fallback.text}`,
         provider: 'dummy-fallback',
         model: 'dummy-local',
+        thinkingDetail: behaviour.summaryLines.join('\n'),
+        thinkingSummary: behaviour.summaryLines[0] ?? 'Konteks perilaku lokal',
       };
     } else {
       throw err;
     }
   }
 
+  let thinkingDetail = result.thinkingDetail ?? null;
+  let thinkingSummary = result.thinkingSummary ?? null;
+
+  // synthesize thinking preview from behaviour when model returns none
+  if (!thinkingDetail && behaviour.summaryLines.length > 0) {
+    thinkingDetail = behaviour.summaryLines.join('\n');
+    thinkingSummary = behaviour.summaryLines[0];
+  } else if (thinkingDetail && !thinkingSummary) {
+    thinkingSummary = summarizeThinking(thinkingDetail);
+  }
+
   const content = result.text;
 
   const lower = content.toLowerCase();
   const needsVerif =
-    content.includes('⚠️') ||
+    content.includes('[PERINGATAN]') ||
     lower.includes('verifikasi dokter') ||
     lower.includes('konsultasikan dengan dokter') ||
     /\b(dosis|interaksi obat)\b/i.test(content);
 
-  return { content, needsVerif, provider: result.provider, model: result.model };
+  return {
+    content,
+    needsVerif,
+    provider: result.provider,
+    model: result.model,
+    thinkingSummary,
+    thinkingDetail,
+  };
 }
 
 /**
@@ -229,12 +203,15 @@ export async function generateSchedule(userId: number): Promise<Array<{
   time: string;
   colorScheme: string;
 }>> {
-  const userContext = await buildUserContext(userId);
+  const clinicalContext = await buildClinicalContext(userId);
+  const behaviour = await buildBehaviourContext(userId);
   const today = new Date().toLocaleDateString('id-ID', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const prompt = `${userContext}
+  const prompt = `${clinicalContext}
+
+${behaviour.text}
 
 Tanggal: ${today}
 
@@ -283,14 +260,17 @@ Urutkan berdasarkan waktu. Pastikan jadwal obat sesuai petunjuk medis (pagi/mala
  */
 export async function generateDailyInsight(userId: number): Promise<{
   mainInsight: string;
-  tips: Array<{ emoji: string; text: string }>;
+  tips: Array<{ text: string }>;
 }> {
-  const userContext = await buildUserContext(userId);
+  const clinicalContext = await buildClinicalContext(userId);
+  const behaviour = await buildBehaviourContext(userId);
   const today = new Date().toLocaleDateString('id-ID', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const prompt = `${userContext}
+  const prompt = `${clinicalContext}
+
+${behaviour.text}
 
 Tanggal: ${today}
 
@@ -302,9 +282,9 @@ Format JSON ONLY:
 {
   "mainInsight": "satu paragraf insight utama yang personal dan bermanfaat",
   "tips": [
-    {"emoji": "emoji relevan", "text": "tip konkret 1"},
-    {"emoji": "emoji relevan", "text": "tip konkret 2"},
-    {"emoji": "emoji relevan", "text": "tip konkret 3"}
+    {"text": "tip konkret 1"},
+    {"text": "tip konkret 2"},
+    {"text": "tip konkret 3"}
   ]
 }`;
 
@@ -322,9 +302,9 @@ Format JSON ONLY:
   return {
     mainInsight: 'Jaga kesehatan Anda hari ini dengan rutin minum obat dan makan teratur.',
     tips: [
-      { emoji: '💊', text: 'Pastikan tidak melewatkan jadwal obat hari ini' },
-      { emoji: '💧', text: 'Minum minimal 8 gelas air putih sehari' },
-      { emoji: '🚶', text: 'Lakukan aktivitas ringan 30 menit untuk menjaga kesehatan' },
+      { text: 'Pastikan tidak melewatkan jadwal obat hari ini' },
+      { text: 'Minum minimal 8 gelas air putih sehari' },
+      { text: 'Lakukan aktivitas ringan 30 menit untuk menjaga kesehatan' },
     ],
   };
 }

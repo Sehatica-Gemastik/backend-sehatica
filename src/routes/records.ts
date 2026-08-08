@@ -4,7 +4,7 @@ import { medicalRecords } from '../db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
-import { ocrMedicalDocument, summarizeMedicalRecord } from '../services/gemini';
+import { ocrMedicalDocument, summarizeMedicalRecord } from '../services/ai';
 
 const records = new Hono();
 
