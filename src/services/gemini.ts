@@ -1,58 +1,30 @@
 import { db } from '../db';
 import { medicalRecords, schedules, users } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { getLlmProvider, dummyProvider, LlmRateLimitError, LlmAuthError } from './llm/provider';
+import { isDummyLlm, llmConfig, resolveActiveApiKey } from '../config/llm';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
-
-// ── Generic Gemini text generation ────────────────────────────────────────
+// ── Text generation via configurable LLM provider (default: dummy) ────────
 async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
-  const body: Record<string, unknown> = {
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 2048,
-    },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
-    ],
-  };
-
-  if (systemInstruction) {
-    body.systemInstruction = { parts: [{ text: systemInstruction }] };
-  }
-
-  const response = await fetch(
-    `${GEMINI_BASE_URL}/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Gemini API error: ${response.status} ${error}`);
-  }
-
-  const data = await response.json() as {
-    candidates: Array<{
-      content: { parts: Array<{ text: string }> };
-      finishReason: string;
-    }>;
-  };
-
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Maaf, saya tidak dapat memproses permintaan Anda saat ini.';
+  const result = await getLlmProvider().generateText(prompt, systemInstruction);
+  return result.text;
 }
 
-// ── Gemini Vision for OCR ──────────────────────────────────────────────────
+// ── Vision OCR — still Gemini when key present; dummy OCR otherwise ───────
 async function generateTextWithImage(prompt: string, imageBase64: string, mimeType = 'image/jpeg'): Promise<string> {
+  if (isDummyLlm() || !resolveActiveApiKey()) {
+    return JSON.stringify({
+      extractedText: '(dummy OCR) Teks dokumen tidak diekstrak — set LLM_PROVIDER=gemini + GEMINI_API_KEY.',
+      title: 'Dokumen Medis (dummy)',
+      summary: 'OCR dummy untuk local development.',
+      tags: ['Dokumen', 'Dummy'],
+      recordType: 'image',
+    });
+  }
+
+  const model = llmConfig.model || 'gemini-2.0-flash';
+  const base = llmConfig.baseUrl || 'https://generativelanguage.googleapis.com/v1beta';
+  const key = resolveActiveApiKey();
   const body = {
     contents: [{
       role: 'user',
@@ -65,7 +37,7 @@ async function generateTextWithImage(prompt: string, imageBase64: string, mimeTy
   };
 
   const response = await fetch(
-    `${GEMINI_BASE_URL}/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+    `${base}/models/${model}:generateContent?key=${key}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -157,56 +129,46 @@ export async function chatWithHeally(
   userId: number,
   conversationHistory: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }>,
   userMessage: string
-): Promise<{ content: string; needsVerif: boolean }> {
+): Promise<{ content: string; needsVerif: boolean; provider: string; model: string }> {
   const userContext = await buildUserContext(userId);
   const systemInstruction = getHeallySystemPrompt(userContext);
+  const llm = getLlmProvider();
 
-  // Build multi-turn conversation
-  const allMessages = [
-    ...conversationHistory,
-    { role: 'user' as const, parts: [{ text: userMessage }] },
-  ];
-
-  const body = {
-    systemInstruction: { parts: [{ text: systemInstruction }] },
-    contents: allMessages,
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 1024,
-    },
-  };
-
-  const response = await fetch(
-    `${GEMINI_BASE_URL}/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+  let result;
+  try {
+    result = await llm.generateChat(systemInstruction, conversationHistory, userMessage);
+  } catch (err) {
+    if (llm.name === 'gemini' && (err instanceof LlmRateLimitError || err instanceof LlmAuthError)) {
+      const reason =
+        err instanceof LlmAuthError
+          ? err.message
+          : 'Kuota Gemini free tier penuh sementara. Tunggu ~1 menit lalu coba lagi.';
+      console.warn('[heally] Gemini unavailable —', reason);
+      const fallback = await dummyProvider.generateChat(
+        systemInstruction,
+        conversationHistory,
+        userMessage
+      );
+      result = {
+        text: `*${reason}*\n\n${fallback.text}`,
+        provider: 'dummy-fallback',
+        model: 'dummy-local',
+      };
+    } else {
+      throw err;
     }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Gemini error: ${response.status}`);
   }
 
-  const data = await response.json() as {
-    candidates: Array<{ content: { parts: Array<{ text: string }> } }>;
-  };
+  const content = result.text;
 
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text
-    ?? 'Maaf, saya sedang tidak dapat merespons. Silakan coba lagi.';
+  const lower = content.toLowerCase();
+  const needsVerif =
+    content.includes('⚠️') ||
+    lower.includes('verifikasi dokter') ||
+    lower.includes('konsultasikan dengan dokter') ||
+    /\b(dosis|interaksi obat)\b/i.test(content);
 
-  // Detect if response needs doctor verification
-  const needsVerif = content.includes('⚠️') ||
-    content.toLowerCase().includes('verifikasi dokter') ||
-    content.toLowerCase().includes('konsultasikan dengan dokter') ||
-    content.toLowerCase().includes('dosis') ||
-    content.toLowerCase().includes('obat') ||
-    content.toLowerCase().includes('interaksi');
-
-  return { content, needsVerif };
+  return { content, needsVerif, provider: result.provider, model: result.model };
 }
 
 /**
