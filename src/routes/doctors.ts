@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db';
-import { doctors, users } from '../db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { doctors, userDoctors } from '../db/schema';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 
@@ -9,38 +9,165 @@ const doctorsRoute = new Hono();
 
 doctorsRoute.use('*', authMiddleware);
 
-// GET /doctors — list all available doctors
+function formatDoctor(d: any, isYours = false) {
+  return {
+    id: d.id,
+    name: d.user?.name ?? 'Dokter',
+    email: d.user?.email,
+    specialty: d.specialty,
+    rating: parseFloat(d.rating ?? '5.0'),
+    reviewCount: d.reviewCount,
+    verifiedCount: d.verifiedCount,
+    isAvailable: d.isAvailable,
+    bio: d.bio,
+    avatarInitials: d.user?.avatarInitials ?? 'DR',
+    colorScheme: 'blue',
+    qrPayload: `sehatica:doctor:${d.id}`,
+    isYours,
+  };
+}
+
+/** Parse QR / kode: sehatica:doctor:12 | sehatica://doctor/12 | plain number */
+function parseDoctorCode(raw: string): number | null {
+  const value = raw.trim();
+  if (!value) return null;
+
+  const patterns = [
+    /^sehatica:doctor:(\d+)$/i,
+    /^sehatica:\/\/doctor\/(\d+)$/i,
+    /^mobilesehatica:\/\/doctor\/(\d+)$/i,
+    /^DOC-(\d+)$/i,
+    /^(\d+)$/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern);
+    if (match) {
+      const id = parseInt(match[1], 10);
+      return Number.isFinite(id) ? id : null;
+    }
+  }
+
+  try {
+    const json = JSON.parse(value);
+    if (json?.type === 'doctor' && json?.id) return parseInt(String(json.id), 10);
+    if (json?.sehatica === 'doctor' && json?.id) return parseInt(String(json.id), 10);
+  } catch {
+    // not json
+  }
+
+  return null;
+}
+
+// GET /doctors — all doctors (partners flagged)
 doctorsRoute.get('/', async (c) => {
   try {
+    const userId = c.get('userId') as number;
+
     const allDoctors = await db.query.doctors.findMany({
       with: { user: true },
       orderBy: [desc(doctors.verifiedCount)],
     });
 
-    const formatted = allDoctors.map((d: any) => ({
-      id: d.id,
-      name: d.user?.name ?? 'Dokter',
-      email: d.user?.email,
-      specialty: d.specialty,
-      rating: parseFloat(d.rating ?? '5.0'),
-      reviewCount: d.reviewCount,
-      verifiedCount: d.verifiedCount,
-      isAvailable: d.isAvailable,
-      bio: d.bio,
-      avatarInitials: d.user?.avatarInitials ?? 'DR',
-      colorScheme: 'blue',
-    }));
+    const links = await db.query.userDoctors.findMany({
+      where: eq(userDoctors.userId, userId),
+    });
+    const partnerIds = new Set(links.map((l) => l.doctorId));
 
-    return successResponse(c, formatted);
+    return successResponse(
+      c,
+      allDoctors.map((d: any) => formatDoctor(d, partnerIds.has(d.id)))
+    );
   } catch {
     return errorResponse(c, 'Gagal mengambil daftar dokter', 500);
   }
 });
 
-// GET /doctors/:id
+// GET /doctors/partners — only linked partners
+doctorsRoute.get('/partners', async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    const links = await db.query.userDoctors.findMany({
+      where: eq(userDoctors.userId, userId),
+      with: { doctor: { with: { user: true } } },
+      orderBy: [desc(userDoctors.createdAt)],
+    });
+
+    return successResponse(
+      c,
+      links
+        .filter((l: any) => l.doctor)
+        .map((l: any) => formatDoctor(l.doctor, true))
+    );
+  } catch {
+    return errorResponse(c, 'Gagal mengambil dokter partner', 500);
+  }
+});
+
+// POST /doctors/partners — add partner via QR / kode
+doctorsRoute.post('/partners', async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    const body = await c.req.json();
+    const code = String(body.code ?? body.qr ?? body.doctorId ?? '').trim();
+
+    if (!code) {
+      return errorResponse(c, 'Kode QR dokter wajib diisi');
+    }
+
+    const doctorId = parseDoctorCode(code);
+    if (!doctorId) {
+      return errorResponse(c, 'Kode QR tidak valid. Format: sehatica:doctor:{id}');
+    }
+
+    const doctor = await db.query.doctors.findFirst({
+      where: eq(doctors.id, doctorId),
+      with: { user: true },
+    });
+
+    if (!doctor) {
+      return errorResponse(c, 'Dokter tidak ditemukan', 404);
+    }
+
+    const existing = await db.query.userDoctors.findFirst({
+      where: and(eq(userDoctors.userId, userId), eq(userDoctors.doctorId, doctorId)),
+    });
+
+    if (existing) {
+      return successResponse(c, {
+        alreadyLinked: true,
+        doctor: formatDoctor(doctor, true),
+      });
+    }
+
+    await db.insert(userDoctors).values({
+      userId,
+      doctorId,
+      isPrimary: false,
+    });
+
+    return successResponse(
+      c,
+      {
+        alreadyLinked: false,
+        doctor: formatDoctor(doctor, true),
+      },
+      201
+    );
+  } catch (err) {
+    console.error('Add partner error:', err);
+    return errorResponse(c, 'Gagal menambahkan dokter partner', 500);
+  }
+});
+
+// GET /doctors/:id — must stay after /partners
 doctorsRoute.get('/:id', async (c) => {
   try {
     const id = parseInt(c.req.param('id'));
+    if (!Number.isFinite(id)) {
+      return errorResponse(c, 'ID dokter tidak valid');
+    }
+
     const doctor = await db.query.doctors.findFirst({
       where: eq(doctors.id, id),
       with: { user: true },
@@ -48,17 +175,7 @@ doctorsRoute.get('/:id', async (c) => {
 
     if (!doctor) return errorResponse(c, 'Dokter tidak ditemukan', 404);
 
-    return successResponse(c, {
-      id: doctor.id,
-      name: (doctor as any).user?.name ?? 'Dokter',
-      specialty: doctor.specialty,
-      rating: parseFloat(doctor.rating ?? '5.0'),
-      reviewCount: doctor.reviewCount,
-      verifiedCount: doctor.verifiedCount,
-      isAvailable: doctor.isAvailable,
-      bio: doctor.bio,
-      avatarInitials: (doctor as any).user?.avatarInitials ?? 'DR',
-    });
+    return successResponse(c, formatDoctor(doctor));
   } catch {
     return errorResponse(c, 'Terjadi kesalahan server', 500);
   }
