@@ -15,6 +15,8 @@ import {
   rewardAskOnUserReply,
 } from '../services/rdsa/ask-planner';
 import { seedNotificationArms } from '../scripts/seed-arms';
+import { getThinkingDraftSteps } from '../services/heally/context';
+import { createVerifForMessage } from '../services/heally/verif-flow';
 
 const heally = new Hono();
 
@@ -36,6 +38,11 @@ heally.get('/messages', async (c) => {
   } catch {
     return errorResponse(c, 'Gagal mengambil riwayat chat', 500);
   }
+});
+
+// GET /heally/thinking-steps — labels for in-flight thinking UI
+heally.get('/thinking-steps', (c) => {
+  return successResponse(c, { steps: getThinkingDraftSteps() });
 });
 
 // GET /heally/llm-status — which provider is active (no secrets)
@@ -82,11 +89,8 @@ heally.post('/chat', rateLimit({ keyPrefix: 'heally-chat' }), async (c) => {
         parts: [{ text: msg.content }],
       }));
 
-    const { content, needsVerif, provider, model } = await chatWithHeally(
-      userId,
-      conversationHistory,
-      message
-    );
+    const { content, needsVerif, provider, model, thinkingSummary, thinkingDetail } =
+      await chatWithHeally(userId, conversationHistory, message);
 
     const [aiMsg] = await db.insert(chatMessages).values({
       userId,
@@ -94,24 +98,27 @@ heally.post('/chat', rateLimit({ keyPrefix: 'heally-chat' }), async (c) => {
       content,
       needsVerif,
       verifStatus: needsVerif ? 'pending' as const : null,
+      thinkingSummary,
+      thinkingDetail,
     }).returning();
 
     let verifRequest = null;
     if (needsVerif) {
-      [verifRequest] = await db.insert(verifRequests).values({
-        messageId: aiMsg.id,
+      verifRequest = await createVerifForMessage({
         userId,
+        messageId: aiMsg.id,
         userQuestion: message,
         aiAnswer: content,
-        status: 'pending',
-      }).returning();
-
-      await db.update(chatMessages).set({ verifStatus: 'pending' }).where(eq(chatMessages.id, aiMsg.id));
+      });
     }
+
+    const savedAi = verifRequest
+      ? await db.query.chatMessages.findFirst({ where: eq(chatMessages.id, aiMsg.id) })
+      : aiMsg;
 
     return successResponse(c, {
       userMessage: userMsg,
-      aiMessage: { ...aiMsg, verifStatus: needsVerif ? 'pending' : null },
+      aiMessage: savedAi ?? aiMsg,
       verifRequest,
       llm: { provider, model },
     });
@@ -221,17 +228,12 @@ heally.post('/verif-request/:messageId', async (c) => {
     const msgIndex = userMessages.findIndex((m) => m.id === messageId);
     const question = msgIndex > 0 ? userMessages[msgIndex - 1].content : 'Pertanyaan pengguna';
 
-    const [verifReq] = await db.insert(verifRequests).values({
-      messageId,
+    const verifReq = await createVerifForMessage({
       userId,
+      messageId,
       userQuestion: question,
       aiAnswer: message.content,
-      status: 'pending',
-    }).returning();
-
-    await db.update(chatMessages)
-      .set({ needsVerif: true, verifStatus: 'pending' })
-      .where(eq(chatMessages.id, messageId));
+    });
 
     return successResponse(c, verifReq, 201);
   } catch {

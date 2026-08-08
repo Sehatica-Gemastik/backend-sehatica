@@ -58,9 +58,9 @@ home.get('/dashboard', async (c) => {
         insight = {
           mainInsight: 'Jaga kesehatan Anda hari ini.',
           tips: [
-            { emoji: '💊', text: 'Minum obat sesuai jadwal' },
-            { emoji: '💧', text: 'Cukupi kebutuhan air minum' },
-            { emoji: '🚶', text: 'Lakukan aktivitas fisik ringan' },
+            { text: 'Minum obat sesuai jadwal' },
+            { text: 'Cukupi kebutuhan air minum' },
+            { text: 'Lakukan aktivitas fisik ringan' },
           ],
         };
       }

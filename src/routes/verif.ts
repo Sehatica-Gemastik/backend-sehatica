@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { db } from '../db';
 import { verifRequests, chatMessages, doctors, users } from '../db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, or, inArray } from 'drizzle-orm';
+import { getDoctorPatientUserIds, getDoctorRecordId } from '../services/heally/verif-flow';
 import { authMiddleware, doctorMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 
@@ -16,9 +17,21 @@ verif.get('/', async (c) => {
     const userRole = c.get('userRole') as string;
 
     let list;
-    if (userRole === 'doctor' || userRole === 'admin') {
-      // Doctors see all pending requests
+    if (userRole === 'admin') {
       list = await db.query.verifRequests.findMany({
+        with: { user: true, doctor: { with: { user: true } } },
+        orderBy: [desc(verifRequests.createdAt)],
+      });
+    } else if (userRole === 'doctor') {
+      const patientIds = await getDoctorPatientUserIds(userId);
+      const doctorId = await getDoctorRecordId(userId);
+
+      const conditions = [];
+      if (doctorId) conditions.push(eq(verifRequests.doctorId, doctorId));
+      if (patientIds.length > 0) conditions.push(inArray(verifRequests.userId, patientIds));
+
+      list = await db.query.verifRequests.findMany({
+        where: conditions.length > 0 ? or(...conditions) : eq(verifRequests.id, -1),
         with: { user: true, doctor: { with: { user: true } } },
         orderBy: [desc(verifRequests.createdAt)],
       });
