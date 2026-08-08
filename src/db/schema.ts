@@ -33,6 +33,13 @@ export const verifStatusEnum = pgEnum('verif_status', [
   'revised',
 ]);
 export const messageRoleEnum = pgEnum('message_role', ['user', 'assistant']);
+export const askStatusEnum = pgEnum('ask_status', [
+  'pending',
+  'delivered',
+  'replied',
+  'expired',
+  'dismissed',
+]);
 
 // ── Users ──────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
@@ -132,6 +139,75 @@ export const chatMessages = pgTable('chat_messages', {
   verifNote: text('verif_note'),
   verifDoctorName: varchar('verif_doctor_name', { length: 255 }),
   fromWhatsApp: boolean('from_whatsapp').default(false).notNull(),
+  /** links proactive Heally Ask into the same thread */
+  askId: varchar('ask_id', { length: 64 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// ── RDSA notification arms (Heally Ask templates) ──────────────────────────
+export const notificationArms = pgTable('notification_arms', {
+  id: serial('id').primaryKey(),
+  armId: varchar('arm_id', { length: 64 }).notNull().unique(),
+  intent: varchar('intent', { length: 64 }).notNull(),
+  channels: text('channels').array().notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  body: text('body').notNull(),
+  tone: varchar('tone', { length: 32 }),
+  locale: varchar('locale', { length: 8 }).default('id').notNull(),
+  enabled: boolean('enabled').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const notificationEvents = pgTable('notification_events', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  armId: varchar('arm_id', { length: 64 }).notNull(),
+  askId: varchar('ask_id', { length: 64 }),
+  sentAt: timestamp('sent_at').defaultNow().notNull(),
+  reward: numeric('reward', { precision: 4, scale: 2 }),
+  rewardRecordedAt: timestamp('reward_recorded_at'),
+  contextJson: text('context_json'),
+});
+
+export const notificationArmStatistics = pgTable('notification_arm_statistics', {
+  armId: varchar('arm_id', { length: 64 }).primaryKey(),
+  selectedCount: integer('selected_count').default(0).notNull(),
+  selectedRewardSum: numeric('selected_reward_sum', { precision: 12, scale: 4 })
+    .default('0')
+    .notNull(),
+  eligibleNotSelectedCount: integer('eligible_not_selected_count').default(0).notNull(),
+  eligibleNotSelectedRewardSum: numeric('eligible_not_selected_reward_sum', {
+    precision: 12,
+    scale: 4,
+  })
+    .default('0')
+    .notNull(),
+  muPlus: numeric('mu_plus', { precision: 8, scale: 6 }).default('0.5').notNull(),
+  muMinus: numeric('mu_minus', { precision: 8, scale: 6 }).default('0.5').notNull(),
+  baseScore: numeric('base_score', { precision: 8, scale: 6 }).default('0').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+/** Heally Ask — proactive check-in (see Heally_Plan.md) */
+export const heallyAsks = pgTable('heally_asks', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  armId: varchar('arm_id', { length: 64 }).notNull(),
+  intent: varchar('intent', { length: 64 }).notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  body: text('body').notNull(),
+  status: askStatusEnum('status').default('pending').notNull(),
+  channels: text('channels').array().notNull(),
+  messageId: integer('message_id').references(() => chatMessages.id),
+  reward: numeric('reward', { precision: 4, scale: 2 }),
+  deliveredAt: timestamp('delivered_at'),
+  repliedAt: timestamp('replied_at'),
+  expiresAt: timestamp('expires_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -174,12 +250,19 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   verifRequests: many(verifRequests),
   dailyInsights: many(dailyInsights),
   userDoctors: many(userDoctors),
+  heallyAsks: many(heallyAsks),
+  notificationEvents: many(notificationEvents),
 }));
 
 export const doctorsRelations = relations(doctors, ({ one, many }) => ({
   user: one(users, { fields: [doctors.userId], references: [users.id] }),
   verifRequests: many(verifRequests),
   userDoctors: many(userDoctors),
+}));
+
+export const userDoctorsRelations = relations(userDoctors, ({ one }) => ({
+  user: one(users, { fields: [userDoctors.userId], references: [users.id] }),
+  doctor: one(doctors, { fields: [userDoctors.doctorId], references: [doctors.id] }),
 }));
 
 export const medicalRecordsRelations = relations(medicalRecords, ({ one }) => ({
@@ -219,3 +302,5 @@ export type Schedule = typeof schedules.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type VerifRequest = typeof verifRequests.$inferSelect;
 export type DailyInsight = typeof dailyInsights.$inferSelect;
+export type NotificationArm = typeof notificationArms.$inferSelect;
+export type HeallyAsk = typeof heallyAsks.$inferSelect;
