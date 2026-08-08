@@ -141,6 +141,10 @@ export const chatMessages = pgTable('chat_messages', {
   fromWhatsApp: boolean('from_whatsapp').default(false).notNull(),
   /** links proactive Heally Ask into the same thread */
   askId: varchar('ask_id', { length: 64 }),
+  /** collapsed preview of model reasoning */
+  thinkingSummary: varchar('thinking_summary', { length: 255 }),
+  /** full reasoning trace (expand on tap) */
+  thinkingDetail: text('thinking_detail'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
