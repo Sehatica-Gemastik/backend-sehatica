@@ -64,7 +64,7 @@ records.post('/', async (c) => {
     let summary = body.summary;
     if (content && !summary) {
       try {
-        summary = await summarizeMedicalRecord(content, type);
+        summary = await summarizeMedicalRecord(content, type, userId);
       } catch {
         summary = null;
       }
@@ -152,7 +152,7 @@ records.post('/voice', async (c) => {
     let summary = null;
     if (transcription) {
       try {
-        summary = await summarizeMedicalRecord(transcription, 'voice');
+        summary = await summarizeMedicalRecord(transcription, 'voice', userId);
       } catch { /* skip */ }
     }
 

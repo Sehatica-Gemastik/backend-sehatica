@@ -6,11 +6,17 @@ import {
   LlmAuthError,
 } from './llm/provider';
 import {
-  buildClinicalContext,
+  buildClinicalContextForProvider,
   buildBehaviourContext,
   getHeallySystemPrompt,
   summarizeThinking,
 } from './heally/context';
+import {
+  loadPrivacyProfile,
+  sanitizeChatHistory,
+  sanitizeTextForLlm,
+  shouldSanitizeForLlm,
+} from './heally/privacy';
 
 // ── Text generation via configurable LLM provider (default: dummy) ────────
 async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
@@ -81,16 +87,26 @@ export async function chatWithHeally(
   thinkingSummary: string | null;
   thinkingDetail: string | null;
 }> {
-  const [clinicalContext, behaviour] = await Promise.all([
-    buildClinicalContext(userId),
+  const [clinicalContext, behaviour, profile] = await Promise.all([
+    buildClinicalContextForProvider(userId),
     buildBehaviourContext(userId),
+    loadPrivacyProfile(userId),
   ]);
-  const systemInstruction = getHeallySystemPrompt(clinicalContext, behaviour.text);
+  let systemInstruction = getHeallySystemPrompt(clinicalContext, behaviour.text);
+  let safeHistory = conversationHistory;
+  let safeMessage = userMessage;
+
+  if (shouldSanitizeForLlm()) {
+    systemInstruction = sanitizeTextForLlm(systemInstruction, profile);
+    safeHistory = sanitizeChatHistory(conversationHistory, profile);
+    safeMessage = sanitizeTextForLlm(userMessage, profile);
+  }
+
   const llm = getLlmProvider();
 
   let result;
   try {
-    result = await llm.generateChat(systemInstruction, conversationHistory, userMessage);
+    result = await llm.generateChat(systemInstruction, safeHistory, safeMessage);
   } catch (err) {
     if (llm.name !== 'dummy' && (err instanceof LlmRateLimitError || err instanceof LlmAuthError)) {
       const reason =
@@ -100,8 +116,8 @@ export async function chatWithHeally(
       console.warn(`[heally] ${llm.name} unavailable —`, reason);
       const fallback = await dummyProvider.generateChat(
         systemInstruction,
-        conversationHistory,
-        userMessage
+        safeHistory,
+        safeMessage
       );
       result = {
         text: `*${reason}*\n\n${fallback.text}`,
@@ -203,13 +219,16 @@ export async function generateSchedule(userId: number): Promise<Array<{
   time: string;
   colorScheme: string;
 }>> {
-  const clinicalContext = await buildClinicalContext(userId);
-  const behaviour = await buildBehaviourContext(userId);
+  const [clinicalContext, behaviour, profile] = await Promise.all([
+    buildClinicalContextForProvider(userId),
+    buildBehaviourContext(userId),
+    loadPrivacyProfile(userId),
+  ]);
   const today = new Date().toLocaleDateString('id-ID', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const prompt = `${clinicalContext}
+  let prompt = `${clinicalContext}
 
 ${behaviour.text}
 
@@ -233,6 +252,10 @@ Balas HANYA dalam format JSON array berikut (8-12 item):
 ]
 
 Urutkan berdasarkan waktu. Pastikan jadwal obat sesuai petunjuk medis (pagi/malam, sebelum/sesudah makan).`;
+
+  if (shouldSanitizeForLlm()) {
+    prompt = sanitizeTextForLlm(prompt, profile);
+  }
 
   const rawResponse = await generateText(prompt);
 
@@ -262,13 +285,16 @@ export async function generateDailyInsight(userId: number): Promise<{
   mainInsight: string;
   tips: Array<{ text: string }>;
 }> {
-  const clinicalContext = await buildClinicalContext(userId);
-  const behaviour = await buildBehaviourContext(userId);
+  const [clinicalContext, behaviour, profile] = await Promise.all([
+    buildClinicalContextForProvider(userId),
+    buildBehaviourContext(userId),
+    loadPrivacyProfile(userId),
+  ]);
   const today = new Date().toLocaleDateString('id-ID', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const prompt = `${clinicalContext}
+  let prompt = `${clinicalContext}
 
 ${behaviour.text}
 
@@ -287,6 +313,10 @@ Format JSON ONLY:
     {"text": "tip konkret 3"}
   ]
 }`;
+
+  if (shouldSanitizeForLlm()) {
+    prompt = sanitizeTextForLlm(prompt, profile);
+  }
 
   const rawResponse = await generateText(prompt);
 
@@ -312,13 +342,22 @@ Format JSON ONLY:
 /**
  * Summarize a medical record text
  */
-export async function summarizeMedicalRecord(content: string, type: string): Promise<string> {
-  const prompt = `Buat ringkasan singkat (maksimal 2 kalimat dalam bahasa Indonesia) dari rekam medis berikut:
+export async function summarizeMedicalRecord(
+  content: string,
+  type: string,
+  userId?: number
+): Promise<string> {
+  let prompt = `Buat ringkasan singkat (maksimal 2 kalimat dalam bahasa Indonesia) dari rekam medis berikut:
 
 Tipe: ${type}
 Konten: ${content}
 
 Balas HANYA dengan ringkasan, tanpa penjelasan tambahan.`;
+
+  if (userId && shouldSanitizeForLlm()) {
+    const profile = await loadPrivacyProfile(userId);
+    prompt = sanitizeTextForLlm(prompt, profile);
+  }
 
   return generateText(prompt);
 }

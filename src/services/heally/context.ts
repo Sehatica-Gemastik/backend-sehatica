@@ -8,10 +8,14 @@ import {
   notificationEvents,
 } from '../../db/schema';
 import { eq, desc, and, gte } from 'drizzle-orm';
+import {
+  formatClinicalContextForLlm,
+  loadPrivacyProfile,
+  shouldSanitizeForLlm,
+} from './privacy';
 
-/** Clinical context — records, meds, profile (existing). */
-export async function buildClinicalContext(userId: number): Promise<string> {
-  const [user, records, userSchedules] = await Promise.all([
+async function fetchClinicalBundle(userId: number) {
+  return Promise.all([
     db.query.users.findFirst({ where: eq(users.id, userId) }),
     db.query.medicalRecords.findMany({
       where: eq(medicalRecords.userId, userId),
@@ -23,6 +27,11 @@ export async function buildClinicalContext(userId: number): Promise<string> {
       limit: 30,
     }),
   ]);
+}
+
+/** Clinical context — full profile for internal/DB use. */
+export async function buildClinicalContext(userId: number): Promise<string> {
+  const [user, records, userSchedules] = await fetchClinicalBundle(userId);
 
   const recordsContext = records
     .map(
@@ -48,6 +57,20 @@ ${recordsContext || 'Belum ada rekam medis'}
 OBAT & JADWAL PILL:
 ${medicationsContext || 'Tidak ada obat aktif'}
 `.trim();
+}
+
+/** De-identified clinical context for external cloud LLM APIs. */
+export async function buildClinicalContextForLlm(userId: number): Promise<string> {
+  const [user, records, userSchedules] = await fetchClinicalBundle(userId);
+  const profile = await loadPrivacyProfile(userId);
+  return formatClinicalContextForLlm(user, records, userSchedules, profile);
+}
+
+export async function buildClinicalContextForProvider(userId: number): Promise<string> {
+  if (shouldSanitizeForLlm()) {
+    return buildClinicalContextForLlm(userId);
+  }
+  return buildClinicalContext(userId);
 }
 
 /**
