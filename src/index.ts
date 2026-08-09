@@ -5,21 +5,23 @@ import { prettyJSON } from 'hono/pretty-json';
 import { secureHeaders } from 'hono/secure-headers';
 
 import auth from './routes/auth';
-import records from './routes/records';
-import schedulesRoute from './routes/schedules';
-import heally from './routes/heally';
-import verif from './routes/verif';
+import ai from './routes/ai';
 import doctors from './routes/doctors';
-import home from './routes/home';
+import reviews from './routes/reviews';
 
 const app = new Hono();
+const allowedOrigins = (process.env.CORS_ORIGINS
+  ?? 'http://localhost:3001,http://localhost:8081,http://localhost:19006')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // ── Global Middlewares ──────────────────────────────────────────────────────
 app.use('*', logger());
 app.use('*', prettyJSON());
 app.use('*', secureHeaders());
 app.use('*', cors({
-  origin: ['http://localhost:3001', 'http://localhost:8081', 'http://localhost:19006', '*'],
+  origin: allowedOrigins,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -41,12 +43,9 @@ app.get('/health', (c) => c.json({ status: 'ok' }));
 const api = app.basePath('/api/v1');
 
 api.route('/auth', auth);
-api.route('/records', records);
-api.route('/schedules', schedulesRoute);
-api.route('/heally', heally);
-api.route('/verif', verif);
+api.route('/ai', ai);
 api.route('/doctors', doctors);
-api.route('/home', home);
+api.route('/reviews', reviews);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────
 app.notFound((c) => {

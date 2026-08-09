@@ -20,7 +20,6 @@ doctorsRoute.get('/', async (c) => {
     const formatted = allDoctors.map((d: any) => ({
       id: d.id,
       name: d.user?.name ?? 'Dokter',
-      email: d.user?.email,
       specialty: d.specialty,
       rating: parseFloat(d.rating ?? '5.0'),
       reviewCount: d.reviewCount,
