@@ -8,6 +8,8 @@ import auth from './routes/auth';
 import ai from './routes/ai';
 import doctors from './routes/doctors';
 import reviews from './routes/reviews';
+import sessions from './routes/sessions';
+import heally from './routes/heally';
 
 const app = new Hono();
 const allowedOrigins = (process.env.CORS_ORIGINS
@@ -46,6 +48,8 @@ api.route('/auth', auth);
 api.route('/ai', ai);
 api.route('/doctors', doctors);
 api.route('/reviews', reviews);
+api.route('/sessions', sessions);
+api.route('/heally', heally);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────
 app.notFound((c) => {
