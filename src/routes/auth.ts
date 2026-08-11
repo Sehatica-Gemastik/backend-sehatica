@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, doctors } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
 import { hashPassword, verifyPassword, generateAvatarInitials } from '../utils/password';
 import {
@@ -67,6 +67,82 @@ auth.post('/register', async (c) => {
   } catch (err) {
     console.error('Register error:', err);
     return errorResponse(c, 'Terjadi kesalahan server', 500);
+  }
+});
+
+// POST /auth/register-doctor — register as a doctor
+auth.post('/register-doctor', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return errorResponse(c, 'Data pendaftaran dokter tidak valid');
+    }
+    const { name, email, password, phone, specialty, bio } = body;
+
+    const parsed = parseRegistrationInput({ name, email, password, phone });
+    if ('error' in parsed) return errorResponse(c, parsed.error);
+
+    if (typeof specialty !== 'string' || !specialty.trim() || specialty.length > 100) {
+      return errorResponse(c, 'Spesialisasi wajib diisi (maksimal 100 karakter)');
+    }
+
+    const existing = await db.query.users.findFirst({
+      where: eq(users.email, parsed.value.email),
+    });
+    if (existing) {
+      return errorResponse(c, 'Email sudah terdaftar', 409);
+    }
+
+    const passwordHash = await hashPassword(parsed.value.password);
+    const avatarInitials = generateAvatarInitials(parsed.value.name);
+
+    const { doctorUser, doctorRecord } = await db.transaction(async (tx) => {
+      const [u] = await tx.insert(users).values({
+        name: parsed.value.name,
+        email: parsed.value.email,
+        passwordHash,
+        role: 'doctor',
+        avatarInitials,
+        phone: parsed.value.phone,
+      }).returning();
+
+      const [d] = await tx.insert(doctors).values({
+        userId: u.id,
+        specialty: specialty.trim(),
+        bio: typeof bio === 'string' ? bio.trim() : null,
+      }).returning();
+
+      return { doctorUser: u, doctorRecord: d };
+    });
+
+    const accessToken = await signAccessToken({
+      sub: doctorUser.id,
+      email: doctorUser.email,
+      role: doctorUser.role,
+    });
+
+    const realRefreshToken = await signRefreshToken(doctorUser.id);
+    await db
+      .update(users)
+      .set({ refreshToken: hashRefreshToken(realRefreshToken) })
+      .where(eq(users.id, doctorUser.id));
+
+    return successResponse(c, {
+      user: {
+        id: doctorUser.id,
+        name: doctorUser.name,
+        email: doctorUser.email,
+        role: doctorUser.role,
+        avatarInitials: doctorUser.avatarInitials,
+        specialty: doctorRecord.specialty,
+        bio: doctorRecord.bio,
+      },
+      accessToken,
+      refreshToken: realRefreshToken,
+    }, 201);
+  } catch (err) {
+    console.error('Doctor Register error:', err);
+    return errorResponse(c, 'Terjadi kesalahan server saat mendaftar dokter', 500);
   }
 });
 
