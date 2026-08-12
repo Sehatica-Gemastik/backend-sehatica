@@ -34,7 +34,7 @@
       "chat"
     ],
     "title": "Obat menunggu",
-    "body": "Heally ingat: {{label}} belum ditandai selesai.",
+    "body": "Sehatica ingat: {{label}} belum ditandai selesai.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -72,7 +72,7 @@
       "system",
       "chat"
     ],
-    "title": "Halo dari Heally",
+    "title": "Halo dari Sehatica",
     "body": "Pengingat lembut: {{label}} pukul {{time}}.",
     "tone": "gentle",
     "locale": "id"
@@ -124,7 +124,7 @@
       "system",
       "chat"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Sudah minum {{label}}? Balas atau tandai di app.",
     "tone": "gentle",
     "locale": "id"
@@ -203,7 +203,7 @@
       "whatsapp"
     ],
     "title": "Pengingat obat",
-    "body": "Heally cek: obat {{label}} belum selesai.",
+    "body": "Sehatica cek: obat {{label}} belum selesai.",
     "tone": "neutral",
     "locale": "id"
   },
@@ -281,7 +281,7 @@
       "whatsapp"
     ],
     "title": "Pengingat obat",
-    "body": "Heally di sini supaya {{label}} tidak terlupakan.",
+    "body": "Sehatica di sini supaya {{label}} tidak terlupakan.",
     "tone": "neutral",
     "locale": "id"
   },
@@ -359,7 +359,7 @@
       "whatsapp"
     ],
     "title": "Nutrisi dulu",
-    "body": "Heally ingat jadwal makanmu: {{label}}.",
+    "body": "Sehatica ingat jadwal makanmu: {{label}}.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -411,7 +411,7 @@
       "whatsapp"
     ],
     "title": "Konsistensi",
-    "body": "Tandai {{label}} supaya Heally bisa bantu lebih akurat.",
+    "body": "Tandai {{label}} supaya Sehatica bisa bantu lebih akurat.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -449,7 +449,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Sudah {{label}}? Balas di chat atau WA.",
     "tone": "gentle",
     "locale": "id"
@@ -510,7 +510,7 @@
       "system"
     ],
     "title": "Jadwal makan",
-    "body": "Heally jaga ritme makamu hari ini.",
+    "body": "Sehatica jaga ritme makamu hari ini.",
     "tone": "neutral",
     "locale": "id"
   },
@@ -558,7 +558,7 @@
       "system"
     ],
     "title": "Minum air",
-    "body": "Heally: jangan lupa minum air.",
+    "body": "Sehatica: jangan lupa minum air.",
     "tone": "playful",
     "locale": "id"
   },
@@ -654,7 +654,7 @@
       "system"
     ],
     "title": "Minum air",
-    "body": "Heally jaga agar kamu tidak dehidrasi.",
+    "body": "Sehatica jaga agar kamu tidak dehidrasi.",
     "tone": "playful",
     "locale": "id"
   },
@@ -729,7 +729,7 @@
       "whatsapp"
     ],
     "title": "Badan kaku?",
-    "body": "Heally usul: mulai {{label}} sekarang.",
+    "body": "Sehatica usul: mulai {{label}} sekarang.",
     "tone": "motivating",
     "locale": "id"
   },
@@ -793,7 +793,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Sudah olahraga ({{label}})?",
     "tone": "motivating",
     "locale": "id"
@@ -844,7 +844,7 @@
       "system"
     ],
     "title": "Olahraga",
-    "body": "Heally siap dampingi setelah {{label}} selesai.",
+    "body": "Sehatica siap dampingi setelah {{label}} selesai.",
     "tone": "motivating",
     "locale": "id"
   },
@@ -975,7 +975,7 @@
       "push",
       "system"
     ],
-    "title": "Heally update",
+    "title": "Sehatica update",
     "body": "Jadwalmu butuh sedikit perhatian.",
     "tone": "neutral",
     "locale": "id"
@@ -1023,7 +1023,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally penasaran",
+    "title": "Sehatica penasaran",
     "body": "Ada keluhan yang perlu dibahas?",
     "tone": "gentle",
     "locale": "id"
@@ -1047,7 +1047,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Kabarin Heally",
+    "title": "Kabarin Sehatica",
     "body": "Sudah lebih baik dibanding kemarin?",
     "tone": "gentle",
     "locale": "id"
@@ -1083,7 +1083,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally di sini",
+    "title": "Sehatica di sini",
     "body": "Kalau ada gejala baru, bilang saja.",
     "tone": "gentle",
     "locale": "id"
@@ -1120,7 +1120,7 @@
       "whatsapp"
     ],
     "title": "Obrolan singkat",
-    "body": "Heally siap dengarkan 1 menit saja.",
+    "body": "Sehatica siap dengarkan 1 menit saja.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -1180,7 +1180,7 @@
       "whatsapp"
     ],
     "title": "Catatan kesehatan",
-    "body": "Mau Heally catat gejala hari ini?",
+    "body": "Mau Sehatica catat gejala hari ini?",
     "tone": "gentle",
     "locale": "id"
   },
@@ -1228,7 +1228,7 @@
       "whatsapp"
     ],
     "title": "Dampingi",
-    "body": "Kalau bingung soal jadwal, tanya Heally.",
+    "body": "Kalau bingung soal jadwal, tanya Sehatica.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -1240,7 +1240,7 @@
       "whatsapp"
     ],
     "title": "Akurasi saran",
-    "body": "Update kondisi biar saran Heally lebih pas.",
+    "body": "Update kondisi biar saran Sehatica lebih pas.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -1251,8 +1251,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
-    "body": "Heally mau pastikan: ada gejala yang mengkhawatirkan?",
+    "title": "Sehatica nanya",
+    "body": "Sehatica mau pastikan: ada gejala yang mengkhawatirkan?",
     "tone": "curious",
     "locale": "id"
   },
@@ -1263,7 +1263,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Balas singkat saja — baik / biasa / kurang fit.",
     "tone": "curious",
     "locale": "id"
@@ -1275,7 +1275,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Kalau lagi oke, cukup bilang “baik”.",
     "tone": "curious",
     "locale": "id"
@@ -1287,7 +1287,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Kalau kurang fit, ceritakan gejalanya.",
     "tone": "curious",
     "locale": "id"
@@ -1299,8 +1299,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
-    "body": "Satu kata pun membantu Heally memahami harimu.",
+    "title": "Sehatica nanya",
+    "body": "Satu kata pun membantu Sehatica memahami harimu.",
     "tone": "curious",
     "locale": "id"
   },
@@ -1311,8 +1311,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
-    "body": "Ada yang ingin diverifikasi dokter lewat Heally?",
+    "title": "Sehatica nanya",
+    "body": "Ada yang ingin diverifikasi dokter lewat Sehatica?",
     "tone": "curious",
     "locale": "id"
   },
@@ -1323,7 +1323,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Mau review singkat rekam medis terakhir?",
     "tone": "curious",
     "locale": "id"
@@ -1335,8 +1335,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
-    "body": "Perlu Heally cek interaksi obat?",
+    "title": "Sehatica nanya",
+    "body": "Perlu Sehatica cek interaksi obat?",
     "tone": "curious",
     "locale": "id"
   },
@@ -1347,7 +1347,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Mau dibuatkan jadwal olahraga ringan?",
     "tone": "curious",
     "locale": "id"
@@ -1359,7 +1359,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Mau tips diet sesuai kondisimu?",
     "tone": "curious",
     "locale": "id"
@@ -1371,7 +1371,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Bagaimana stres / beban pikiran hari ini?",
     "tone": "curious",
     "locale": "id"
@@ -1383,7 +1383,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Apakah obat terasa efek samping?",
     "tone": "curious",
     "locale": "id"
@@ -1395,7 +1395,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Sudah ukur tekanan darah / gula hari ini?",
     "tone": "curious",
     "locale": "id"
@@ -1407,7 +1407,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
+    "title": "Sehatica nanya",
     "body": "Ada janji dokter yang perlu diingat?",
     "tone": "curious",
     "locale": "id"
@@ -1419,8 +1419,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally nanya",
-    "body": "Mau Heally ringkas progress minggu ini?",
+    "title": "Sehatica nanya",
+    "body": "Mau Sehatica ringkas progress minggu ini?",
     "tone": "curious",
     "locale": "id"
   },
@@ -1433,7 +1433,7 @@
       "whatsapp"
     ],
     "title": "Kami kangen",
-    "body": "Heally belum dengar kabarmu. Ada yang bisa dibantu?",
+    "body": "Sehatica belum dengar kabarmu. Ada yang bisa dibantu?",
     "tone": "warm",
     "locale": "id"
   },
@@ -1472,7 +1472,7 @@
       "whatsapp"
     ],
     "title": "Satu menit saja",
-    "body": "Buka Heally sebentar untuk update kondisi.",
+    "body": "Buka Sehatica sebentar untuk update kondisi.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1510,7 +1510,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally menunggu",
+    "title": "Sehatica menunggu",
     "body": "Ada pertanyaan tertunda untukmu.",
     "tone": "warm",
     "locale": "id"
@@ -1589,7 +1589,7 @@
       "whatsapp"
     ],
     "title": "Sore yang tenang",
-    "body": "Waktu bagus untuk update singkat ke Heally.",
+    "body": "Waktu bagus untuk update singkat ke Sehatica.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1602,7 +1602,7 @@
       "whatsapp"
     ],
     "title": "Malam tenang",
-    "body": "Sebelum tidur, kabari Heally kabarmu.",
+    "body": "Sebelum tidur, kabari Sehatica kabarmu.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1627,8 +1627,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
-    "body": "Heally punya pertanyaan singkat untukmu.",
+    "title": "Sehatica mengingatmu",
+    "body": "Sehatica punya pertanyaan singkat untukmu.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1640,7 +1640,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
+    "title": "Sehatica mengingatmu",
     "body": "Ada follow-up kesehatan yang tertunda.",
     "tone": "warm",
     "locale": "id"
@@ -1653,8 +1653,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
-    "body": "Balas kapan saja — Heally tidak menghakimi.",
+    "title": "Sehatica mengingatmu",
+    "body": "Balas kapan saja — Sehatica tidak menghakimi.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1666,7 +1666,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
+    "title": "Sehatica mengingatmu",
     "body": "Satu balasan membantu saran jadi lebih akurat.",
     "tone": "warm",
     "locale": "id"
@@ -1679,7 +1679,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
+    "title": "Sehatica mengingatmu",
     "body": "Sehatica siap saat kamu siap.",
     "tone": "warm",
     "locale": "id"
@@ -1692,8 +1692,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
-    "body": "Jadwal dan Heally menunggu di app.",
+    "title": "Sehatica mengingatmu",
+    "body": "Jadwal dan Sehatica menunggu di app.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1705,7 +1705,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
+    "title": "Sehatica mengingatmu",
     "body": "Kalau sibuk, balas nanti juga boleh.",
     "tone": "warm",
     "locale": "id"
@@ -1718,7 +1718,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
+    "title": "Sehatica mengingatmu",
     "body": "Pengingat: kesehatan butuh ritme, bukan sempurna.",
     "tone": "warm",
     "locale": "id"
@@ -1731,8 +1731,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
-    "body": "Kamu tidak sendirian — Heally dampingi.",
+    "title": "Sehatica mengingatmu",
+    "body": "Kamu tidak sendirian — Sehatica dampingi.",
     "tone": "warm",
     "locale": "id"
   },
@@ -1744,7 +1744,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally mengingatmu",
+    "title": "Sehatica mengingatmu",
     "body": "Yuk lanjut perjalanan sehatmu.",
     "tone": "warm",
     "locale": "id"
@@ -1758,7 +1758,7 @@
       "whatsapp"
     ],
     "title": "Lengkapi rekam",
-    "body": "Upload hasil kunjungan biar Heally lebih akurat.",
+    "body": "Upload hasil kunjungan biar Sehatica lebih akurat.",
     "tone": "helpful",
     "locale": "id"
   },
@@ -1810,7 +1810,7 @@
       "whatsapp"
     ],
     "title": "Agar saran pas",
-    "body": "Heally butuh data terbaru dari rekammu.",
+    "body": "Sehatica butuh data terbaru dari rekammu.",
     "tone": "helpful",
     "locale": "id"
   },
@@ -1874,7 +1874,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally sarankan",
+    "title": "Sehatica sarankan",
     "body": "Tambah catatan kondisi minggu ini.",
     "tone": "helpful",
     "locale": "id"
@@ -1901,7 +1901,7 @@
       "chat"
     ],
     "title": "Verifikasi",
-    "body": "Ada saran Heally yang bisa diminta verifikasi dokter.",
+    "body": "Ada saran Sehatica yang bisa diminta verifikasi dokter.",
     "tone": "informative",
     "locale": "id"
   },
@@ -1940,7 +1940,7 @@
       "chat"
     ],
     "title": "Hasil verifikasi",
-    "body": "Dokter sudah meninjau saran Heally.",
+    "body": "Dokter sudah meninjau saran Sehatica.",
     "tone": "informative",
     "locale": "id"
   },
@@ -2031,7 +2031,7 @@
       "whatsapp"
     ],
     "title": "Bagus!",
-    "body": "Obat ditandai tepat waktu. Heally bangga.",
+    "body": "Obat ditandai tepat waktu. Sehatica bangga.",
     "tone": "positive",
     "locale": "id"
   },
@@ -2095,7 +2095,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally apresiasi",
+    "title": "Sehatica apresiasi",
     "body": "Terima kasih sudah update kondisimu.",
     "tone": "positive",
     "locale": "id"
@@ -2135,7 +2135,7 @@
       "whatsapp"
     ],
     "title": "Balasan diterima",
-    "body": "Heally sudah membaca pesanmu.",
+    "body": "Sehatica sudah membaca pesanmu.",
     "tone": "positive",
     "locale": "id"
   },
@@ -2147,7 +2147,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Selamat pagi{{name_suffix}}. Badan terasa fit?",
     "tone": "warm",
     "locale": "id"
@@ -2160,7 +2160,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Pagi! Cek jadwal obat / makan pagi yuk.",
     "tone": "warm",
     "locale": "id"
@@ -2173,7 +2173,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Mulai hari dengan satu centang sehat.",
     "tone": "warm",
     "locale": "id"
@@ -2186,8 +2186,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
-    "body": "Heally ucapkan pagi. Ada keluhan semalam?",
+    "title": "Pagi dari Sehatica",
+    "body": "Sehatica ucapkan pagi. Ada keluhan semalam?",
     "tone": "warm",
     "locale": "id"
   },
@@ -2199,7 +2199,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Pagi adalah waktu bagus untuk minum air.",
     "tone": "warm",
     "locale": "id"
@@ -2212,7 +2212,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Lihat jadwal pagi sebelum aktivitas padat.",
     "tone": "warm",
     "locale": "id"
@@ -2225,7 +2225,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Satu pertanyaan pagi: tidurmu cukup?",
     "tone": "warm",
     "locale": "id"
@@ -2238,8 +2238,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
-    "body": "Heally siap dampingi harimu.",
+    "title": "Pagi dari Sehatica",
+    "body": "Sehatica siap dampingi harimu.",
     "tone": "warm",
     "locale": "id"
   },
@@ -2251,7 +2251,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
+    "title": "Pagi dari Sehatica",
     "body": "Jangan skip sarapan / obat pagi ya.",
     "tone": "warm",
     "locale": "id"
@@ -2264,8 +2264,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Pagi dari Heally",
-    "body": "Kabarin Heally kalau kurang fit pagi ini.",
+    "title": "Pagi dari Sehatica",
+    "body": "Kabarin Sehatica kalau kurang fit pagi ini.",
     "tone": "warm",
     "locale": "id"
   },
@@ -2277,7 +2277,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Siang. Sudah minum air cukup?",
     "tone": "gentle",
     "locale": "id"
@@ -2290,8 +2290,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
-    "body": "Heally cek: jadwal siang sudah ditandai?",
+    "title": "Siang dari Sehatica",
+    "body": "Sehatica cek: jadwal siang sudah ditandai?",
     "tone": "gentle",
     "locale": "id"
   },
@@ -2303,7 +2303,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Istirahat sebentar dan update kondisi?",
     "tone": "gentle",
     "locale": "id"
@@ -2316,7 +2316,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Siang produktif — jangan lupa obat siang.",
     "tone": "gentle",
     "locale": "id"
@@ -2329,7 +2329,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Bagaimana energimu sore menjelang?",
     "tone": "gentle",
     "locale": "id"
@@ -2342,7 +2342,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Ada gejala yang muncul siang ini?",
     "tone": "gentle",
     "locale": "id"
@@ -2355,7 +2355,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Cek sisa jadwal sebelum sore.",
     "tone": "gentle",
     "locale": "id"
@@ -2368,8 +2368,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
-    "body": "Heally siap kalau mau tanya cepat.",
+    "title": "Siang dari Sehatica",
+    "body": "Sehatica siap kalau mau tanya cepat.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -2381,7 +2381,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Makan siang sesuai rencana?",
     "tone": "gentle",
     "locale": "id"
@@ -2394,7 +2394,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Siang dari Heally",
+    "title": "Siang dari Sehatica",
     "body": "Satu napas, satu teguk air.",
     "tone": "gentle",
     "locale": "id"
@@ -2407,7 +2407,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Sore. Saatnya review jadwal hari ini.",
     "tone": "gentle",
     "locale": "id"
@@ -2420,7 +2420,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Bagaimana harimu secara keseluruhan?",
     "tone": "gentle",
     "locale": "id"
@@ -2433,7 +2433,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Obat malam jangan sampai lupa.",
     "tone": "gentle",
     "locale": "id"
@@ -2446,8 +2446,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
-    "body": "Heally nanya: ada yang perlu dicatat?",
+    "title": "Sore dari Sehatica",
+    "body": "Sehatica nanya: ada yang perlu dicatat?",
     "tone": "gentle",
     "locale": "id"
   },
@@ -2459,7 +2459,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Sisa jadwal: selesaikan sebelum malam.",
     "tone": "gentle",
     "locale": "id"
@@ -2472,7 +2472,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Update singkat biar saran malam lebih pas.",
     "tone": "gentle",
     "locale": "id"
@@ -2485,7 +2485,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Sudah olahraga / jalan sore?",
     "tone": "gentle",
     "locale": "id"
@@ -2498,7 +2498,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Minum air terakhir sebelum malam.",
     "tone": "gentle",
     "locale": "id"
@@ -2511,8 +2511,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
-    "body": "Cerita ke Heally kalau ada keluhan sore.",
+    "title": "Sore dari Sehatica",
+    "body": "Cerita ke Sehatica kalau ada keluhan sore.",
     "tone": "gentle",
     "locale": "id"
   },
@@ -2524,7 +2524,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Sore dari Heally",
+    "title": "Sore dari Sehatica",
     "body": "Sore tenang — check-in 30 detik saja.",
     "tone": "gentle",
     "locale": "id"
@@ -2537,7 +2537,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Menjelang tidur: sudah minum obat malam?",
     "tone": "calm",
     "locale": "id"
@@ -2550,7 +2550,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Tidur cukup bantu pemulihan. Siap istirahat?",
     "tone": "calm",
     "locale": "id"
@@ -2563,8 +2563,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
-    "body": "Heally: catat keluhan sebelum tidur?",
+    "title": "Malam dari Sehatica",
+    "body": "Sehatica: catat keluhan sebelum tidur?",
     "tone": "calm",
     "locale": "id"
   },
@@ -2576,7 +2576,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Matikan notifikasi lain, tapi jangan skip obat malam.",
     "tone": "calm",
     "locale": "id"
@@ -2589,7 +2589,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Satu checklist malam: air, obat, istirahat.",
     "tone": "calm",
     "locale": "id"
@@ -2602,8 +2602,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
-    "body": "Kalau insomnia / nyeri malam, kabari Heally.",
+    "title": "Malam dari Sehatica",
+    "body": "Kalau insomnia / nyeri malam, kabari Sehatica.",
     "tone": "calm",
     "locale": "id"
   },
@@ -2615,8 +2615,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
-    "body": "Selamat beristirahat. Heally jaga ringkasanmu.",
+    "title": "Malam dari Sehatica",
+    "body": "Selamat beristirahat. Sehatica jaga ringkasanmu.",
     "tone": "calm",
     "locale": "id"
   },
@@ -2628,7 +2628,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Malam ini, tubuhmu butuh istirahat.",
     "tone": "calm",
     "locale": "id"
@@ -2641,7 +2641,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Review singkat hari ini sebelum tidur?",
     "tone": "calm",
     "locale": "id"
@@ -2654,7 +2654,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Malam dari Heally",
+    "title": "Malam dari Sehatica",
     "body": "Jadwal besok sudah siap — tidur dulu.",
     "tone": "calm",
     "locale": "id"
@@ -2665,8 +2665,8 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Heally: sudah minum obat?",
+    "title": "Sehatica",
+    "body": "Sehatica: sudah minum obat?",
     "tone": "concise",
     "locale": "id"
   },
@@ -2676,7 +2676,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Cek jadwal yuk 👆",
     "tone": "concise",
     "locale": "id"
@@ -2687,7 +2687,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Kabarin kondisi hari ini dong",
     "tone": "concise",
     "locale": "id"
@@ -2698,7 +2698,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Minum air dulu ya",
     "tone": "concise",
     "locale": "id"
@@ -2709,7 +2709,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Ada gejala baru?",
     "tone": "concise",
     "locale": "id"
@@ -2720,7 +2720,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Tandai jadwal di Sehatica",
     "tone": "concise",
     "locale": "id"
@@ -2731,8 +2731,8 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Heally tunggu balasan singkat",
+    "title": "Sehatica",
+    "body": "Sehatica tunggu balasan singkat",
     "tone": "concise",
     "locale": "id"
   },
@@ -2742,7 +2742,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Obat malam jangan lupa",
     "tone": "concise",
     "locale": "id"
@@ -2753,7 +2753,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Upload lab kalau sudah ada",
     "tone": "concise",
     "locale": "id"
@@ -2764,7 +2764,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Scan QR dokter di app",
     "tone": "concise",
     "locale": "id"
@@ -2775,7 +2775,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Baik / kurang fit? Balas satu kata",
     "tone": "concise",
     "locale": "id"
@@ -2786,7 +2786,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Progress jadwal: buka app sebentar",
     "tone": "concise",
     "locale": "id"
@@ -2797,8 +2797,8 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Follow-up dari Heally 💬",
+    "title": "Sehatica",
+    "body": "Follow-up dari Sehatica 💬",
     "tone": "concise",
     "locale": "id"
   },
@@ -2808,8 +2808,8 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Pertanyaan cepat dari Heally",
+    "title": "Sehatica",
+    "body": "Pertanyaan cepat dari Sehatica",
     "tone": "concise",
     "locale": "id"
   },
@@ -2819,7 +2819,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Sinkron WA ↔ Sehatica aktif",
     "tone": "concise",
     "locale": "id"
@@ -2830,7 +2830,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Butuh verifikasi dokter?",
     "tone": "concise",
     "locale": "id"
@@ -2841,7 +2841,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Jadwal olahraga hari ini?",
     "tone": "concise",
     "locale": "id"
@@ -2852,7 +2852,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Makan sesuai jadwal?",
     "tone": "concise",
     "locale": "id"
@@ -2863,8 +2863,8 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Heally di sini 24/7 (bot)",
+    "title": "Sehatica",
+    "body": "Sehatica di sini 24/7 (bot)",
     "tone": "concise",
     "locale": "id"
   },
@@ -2874,7 +2874,7 @@
     "channels": [
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Balas kapan saja",
     "tone": "concise",
     "locale": "id"
@@ -3161,8 +3161,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Halo! Saya Heally. Asisten kesehatan AI Anda.",
+    "title": "Sehatica",
+    "body": "Halo! Saya Sehatica. Asisten kesehatan AI Anda.",
     "tone": "informative",
     "locale": "id"
   },
@@ -3173,7 +3173,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Silakan pilih topik di bawah atau ketik pertanyaan.",
     "tone": "informative",
     "locale": "id"
@@ -3185,7 +3185,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Saya bisa bantu pahami rekam medis, jadwal, dan gejala.",
     "tone": "informative",
     "locale": "id"
@@ -3197,7 +3197,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Saran saya bisa diminta verifikasi dokter partner.",
     "tone": "informative",
     "locale": "id"
@@ -3209,7 +3209,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Data kesehatanmu dipakai untuk personalisasi — kamu kendalikan.",
     "tone": "informative",
     "locale": "id"
@@ -3221,7 +3221,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Mau mulai dari jadwal, rekam, atau keluhan hari ini?",
     "tone": "informative",
     "locale": "id"
@@ -3233,7 +3233,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Tanya apa saja — mulai dari yang sederhana juga boleh.",
     "tone": "informative",
     "locale": "id"
@@ -3245,7 +3245,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Jika mendesak / darurat, hubungi layanan medis setempat.",
     "tone": "informative",
     "locale": "id"
@@ -3257,8 +3257,8 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
-    "body": "Heally bukan pengganti dokter, tapi teman pantau harian.",
+    "title": "Sehatica",
+    "body": "Sehatica bukan pengganti dokter, tapi teman pantau harian.",
     "tone": "informative",
     "locale": "id"
   },
@@ -3269,7 +3269,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally",
+    "title": "Sehatica",
     "body": "Kamu bisa lanjut di WhatsApp dengan nomor yang sama terhubung.",
     "tone": "informative",
     "locale": "id"
@@ -3347,7 +3347,7 @@
       "chat",
       "whatsapp"
     ],
-    "title": "Heally khawatir kecil",
+    "title": "Sehatica khawatir kecil",
     "body": "Sudah lama tidak ada update kepatuhan jadwal.",
     "tone": "soft_urgent",
     "locale": "id"
@@ -3374,7 +3374,7 @@
       "whatsapp"
     ],
     "title": "Agar akurat",
-    "body": "Tanpa konfirmasi, Heally sulit menyesuaikan saran.",
+    "body": "Tanpa konfirmasi, Sehatica sulit menyesuaikan saran.",
     "tone": "soft_urgent",
     "locale": "id"
   },
@@ -3412,7 +3412,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Minum air sebelum kopi membantu hidrasi pagi.",
     "tone": "helpful",
     "locale": "id"
@@ -3425,7 +3425,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Jalan kaki 10 menit setelah makan bisa bantu metabolisme.",
     "tone": "helpful",
     "locale": "id"
@@ -3438,7 +3438,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Catat gejala di jam yang sama tiap hari biar polanya kelihatan.",
     "tone": "helpful",
     "locale": "id"
@@ -3451,7 +3451,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Obat lebih mudah diingat jika dipasangkan ke kebiasaan (mis. setelah sikat gigi).",
     "tone": "helpful",
     "locale": "id"
@@ -3464,7 +3464,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Tidur teratur sering lebih berdampak daripada “sempurna sekali”.",
     "tone": "helpful",
     "locale": "id"
@@ -3477,8 +3477,8 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
-    "body": "Kalau pusing saat berdiri, duduk dulu lalu kabari Heally.",
+    "title": "Tips Sehatica",
+    "body": "Kalau pusing saat berdiri, duduk dulu lalu kabari Sehatica.",
     "tone": "helpful",
     "locale": "id"
   },
@@ -3490,8 +3490,8 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
-    "body": "Foto label obat membantu Heally mengingatkan dosis.",
+    "title": "Tips Sehatica",
+    "body": "Foto label obat membantu Sehatica mengingatkan dosis.",
     "tone": "helpful",
     "locale": "id"
   },
@@ -3503,7 +3503,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Satu pertanyaan ke dokter di kontrol lebih baik daripada sepuluh yang terlupa.",
     "tone": "helpful",
     "locale": "id"
@@ -3516,7 +3516,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Streak kecil mengalahkan motivasi besar yang putus.",
     "tone": "helpful",
     "locale": "id"
@@ -3529,7 +3529,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Kalau ragu saran AI, minta verifikasi dokter di app.",
     "tone": "helpful",
     "locale": "id"
@@ -3542,7 +3542,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Kurangi scroll malam — tidur lebih dalam bantu pemulihan.",
     "tone": "helpful",
     "locale": "id"
@@ -3555,7 +3555,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Garam & gula: catat jika dokter meminta pantauan.",
     "tone": "helpful",
     "locale": "id"
@@ -3568,7 +3568,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Olahraga bukan harus gym — naik tangga juga dihitung.",
     "tone": "helpful",
     "locale": "id"
@@ -3581,7 +3581,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Bawa botol minum kecil di tas mengurangi lupa hidrasi.",
     "tone": "helpful",
     "locale": "id"
@@ -3594,7 +3594,7 @@
       "whatsapp",
       "push"
     ],
-    "title": "Tips Heally",
+    "title": "Tips Sehatica",
     "body": "Update alergi/kondisi di profil biar saran lebih aman.",
     "tone": "helpful",
     "locale": "id"
@@ -3621,7 +3621,7 @@
       "whatsapp"
     ],
     "title": "Hai {{name}}",
-    "body": "{{name}}, Heally punya pertanyaan singkat.",
+    "body": "{{name}}, Sehatica punya pertanyaan singkat.",
     "tone": "warm",
     "locale": "id"
   },
@@ -3725,7 +3725,7 @@
       "whatsapp"
     ],
     "title": "Hai {{name}}",
-    "body": "{{name}}, Heally siap di WA maupun app.",
+    "body": "{{name}}, Sehatica siap di WA maupun app.",
     "tone": "warm",
     "locale": "id"
   }
