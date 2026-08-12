@@ -198,3 +198,83 @@ export async function loadPrivacyProfile(userId: number): Promise<PrivacyProfile
 
   return buildPrivacyProfile(user, extraTerms);
 }
+
+type DailyLogLike = {
+  type: string;
+  title: string;
+  time: string;
+  quantity?: string | null;
+  detail?: string | null;
+};
+
+/** PTM factors only — no raw questionnaire answers. */
+export function formatPtmFactorsForLlm(factors: string[]): string {
+  if (factors.length === 0) {
+    return 'Screening PTM selesai — tidak ada faktor risiko yang dilaporkan.';
+  }
+  return `Faktor risiko PTM (${factors.length}): ${factors.join(', ')}`;
+}
+
+export function formatDailyLogsAggregate(logs: DailyLogLike[]): string {
+  if (logs.length === 0) return 'Belum ada catatan harian.';
+  const byType: Record<string, number> = {};
+  for (const log of logs) {
+    byType[log.type] = (byType[log.type] ?? 0) + 1;
+  }
+  const breakdown = Object.entries(byType)
+    .map(([type, count]) => `${type}: ${count}`)
+    .join(', ');
+  return `Total ${logs.length} entri (${breakdown})`;
+}
+
+/** Sanitized log lines for LLM — titles/details redacted, times kept. */
+export function formatDailyLogsForLlm(logs: DailyLogLike[], profile: PrivacyProfile): string {
+  if (logs.length === 0) return 'Belum ada catatan harian hari ini.';
+  const aggregate = formatDailyLogsAggregate(logs);
+  const lines = logs.slice(0, 12).map((log) => {
+    const title = sanitizeTextForLlm(log.title, profile);
+    const qty = log.quantity ? sanitizeTextForLlm(log.quantity, profile) : '';
+    const detail = log.detail ? sanitizeTextForLlm(log.detail, profile) : '';
+    const extra = [qty, detail].filter(Boolean).join(' · ');
+    return `- ${log.time} [${log.type}] ${title}${extra ? ` (${extra})` : ''}`;
+  });
+  return `${aggregate}\n${lines.join('\n')}`;
+}
+
+export function buildDailyHealthContextForLlm(
+  compliance: {
+    dailyLogCount: number;
+    ptmScreeningDone: boolean;
+    ptmFactors: string[];
+    dailyLogs: DailyLogLike[];
+    scheduleSnapshot: Array<{ isAiGenerated?: boolean }>;
+    pendingScheduleIntent: boolean;
+  } | null,
+  profile: PrivacyProfile,
+  date: string
+): string {
+  if (!compliance) {
+    return `
+KONTEKS HARIAN (${date}, de-identified):
+- Screening PTM: belum diisi
+- Catatan harian: belum ada
+`.trim();
+  }
+
+  const screeningLine = compliance.ptmScreeningDone
+    ? formatPtmFactorsForLlm(compliance.ptmFactors)
+    : 'belum diisi';
+
+  const logsLine =
+    compliance.dailyLogCount > 0
+      ? formatDailyLogsForLlm(compliance.dailyLogs, profile)
+      : 'belum ada';
+
+  return `
+KONTEKS HARIAN (${date}, de-identified):
+- Screening PTM: ${screeningLine}
+- Catatan harian:
+${logsLine}
+- Permintaan buat jadwal menunggu konfirmasi: ${compliance.pendingScheduleIntent ? 'ya' : 'tidak'}
+`.trim();
+}

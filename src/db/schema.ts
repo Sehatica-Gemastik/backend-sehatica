@@ -9,6 +9,7 @@ import {
   numeric,
   pgEnum,
   uuid,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -124,6 +125,31 @@ export const schedules = pgTable('schedules', {
   colorScheme: varchar('color_scheme', { length: 50 }), // e.g. "blue"
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+/** Mobile-synced daily compliance for RDSA filtering & Heally CTAs */
+export const userDailyCompliance = pgTable(
+  'user_daily_compliance',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    complianceDate: varchar('compliance_date', { length: 10 }).notNull(),
+    dailyLogCount: integer('daily_log_count').default(0).notNull(),
+    ptmScreeningDone: boolean('ptm_screening_done').default(false).notNull(),
+    ptmFactorsJson: text('ptm_factors_json').default('[]').notNull(),
+    dailyLogsJson: text('daily_logs_json').default('[]').notNull(),
+    scheduleSnapshotJson: text('schedule_snapshot_json').default('[]').notNull(),
+    pendingScheduleIntent: boolean('pending_schedule_intent').default(false).notNull(),
+    syncedAt: timestamp('synced_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userDateUnique: unique('user_daily_compliance_user_date').on(
+      table.userId,
+      table.complianceDate
+    ),
+  })
+);
 
 // ── Heally Chat Messages ───────────────────────────────────────────────────
 export const chatMessages = pgTable('chat_messages', {

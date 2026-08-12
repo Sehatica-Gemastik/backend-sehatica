@@ -16,6 +16,7 @@ import {
 } from '../services/rdsa/ask-planner';
 import { seedNotificationArms } from '../scripts/seed-arms';
 import { getThinkingDraftSteps } from '../services/heally/context';
+import { getScheduleThinkingSteps } from '../services/heally/daily-compliance';
 import { createVerifForMessage } from '../services/heally/verif-flow';
 
 const heally = new Hono();
@@ -42,7 +43,12 @@ heally.get('/messages', async (c) => {
 
 // GET /heally/thinking-steps — labels for in-flight thinking UI
 heally.get('/thinking-steps', (c) => {
-  return successResponse(c, { steps: getThinkingDraftSteps() });
+  const context = c.req.query('context');
+  const steps =
+    context === 'schedule' || context === 'resume'
+      ? getScheduleThinkingSteps()
+      : getThinkingDraftSteps();
+  return successResponse(c, { steps });
 });
 
 // GET /heally/llm-status — which provider is active (no secrets)

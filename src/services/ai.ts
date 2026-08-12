@@ -1,4 +1,3 @@
-import { isDummyLlm, llmConfig, resolveActiveApiKey } from '../config/llm';
 import {
   getLlmProvider,
   dummyProvider,
@@ -12,62 +11,36 @@ import {
   summarizeThinking,
 } from './heally/context';
 import {
+  buildDailyHealthContextForLlm,
+  formatDailyLogsForLlm,
+  formatPtmFactorsForLlm,
   loadPrivacyProfile,
   sanitizeChatHistory,
   sanitizeTextForLlm,
   shouldSanitizeForLlm,
 } from './heally/privacy';
+import {
+  appendCtasToContent,
+  buildDailyHealthContextText,
+  buildHeallyCtas,
+  buildScheduleConfirmMessage,
+  buildScheduleWaitingMessage,
+  getDailyCompliance,
+  getScheduleThinkingSteps,
+  isScheduleIntentMessage,
+  isSchedulePrerequisitesMet,
+  setPendingScheduleIntent,
+} from './heally/daily-compliance';
+import {
+  parseMedicalDocumentVision,
+  standardRecordToLegacyOcr,
+} from './medical-record/vision-parse';
+import type { StandardMedicalRecord } from './medical-record/standard';
 
 // ── Text generation via configurable LLM provider (default: dummy) ────────
 async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
   const result = await getLlmProvider().generateText(prompt, systemInstruction);
   return result.text;
-}
-
-// ── Vision OCR — Gemini only; Groq/text providers use dummy OCR ───────────
-async function generateTextWithImage(prompt: string, imageBase64: string, mimeType = 'image/jpeg'): Promise<string> {
-  if (llmConfig.provider !== 'gemini' || isDummyLlm() || !resolveActiveApiKey()) {
-    return JSON.stringify({
-      extractedText: '(OCR tidak tersedia) Provider saat ini tidak mendukung vision. Upload teks manual atau ganti ke Gemini untuk OCR.',
-      title: 'Dokumen Medis',
-      summary: 'Dokumen diunggah — OCR vision belum aktif untuk provider ini.',
-      tags: ['Dokumen'],
-      recordType: 'image',
-    });
-  }
-
-  const model = llmConfig.model || 'gemini-2.0-flash';
-  const base = llmConfig.baseUrl || 'https://generativelanguage.googleapis.com/v1beta';
-  const key = resolveActiveApiKey();
-  const body = {
-    contents: [{
-      role: 'user',
-      parts: [
-        { text: prompt },
-        { inlineData: { mimeType, data: imageBase64 } },
-      ],
-    }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
-  };
-
-  const response = await fetch(
-    `${base}/models/${model}:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Gemini Vision error: ${response.status}`);
-  }
-
-  const data = await response.json() as {
-    candidates: Array<{ content: { parts: Array<{ text: string }> } }>;
-  };
-
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────
@@ -92,7 +65,15 @@ export async function chatWithHeally(
     buildBehaviourContext(userId),
     loadPrivacyProfile(userId),
   ]);
-  let systemInstruction = getHeallySystemPrompt(clinicalContext, behaviour.text);
+  const today = new Date().toISOString().slice(0, 10);
+  const compliance = await getDailyCompliance(userId, today);
+  const dailyHealthContext = shouldSanitizeForLlm()
+    ? buildDailyHealthContextForLlm(compliance, profile, today)
+    : buildDailyHealthContextText(compliance, today);
+  let systemInstruction = getHeallySystemPrompt(
+    clinicalContext,
+    `${behaviour.text}\n\n${dailyHealthContext}`
+  );
   let safeHistory = conversationHistory;
   let safeMessage = userMessage;
 
@@ -100,6 +81,43 @@ export async function chatWithHeally(
     systemInstruction = sanitizeTextForLlm(systemInstruction, profile);
     safeHistory = sanitizeChatHistory(conversationHistory, profile);
     safeMessage = sanitizeTextForLlm(userMessage, profile);
+  }
+
+  const wantsSchedule = isScheduleIntentMessage(userMessage);
+  const scheduleReady = isSchedulePrerequisitesMet(compliance);
+
+  if (wantsSchedule && scheduleReady) {
+    await setPendingScheduleIntent(userId, today, true);
+    return {
+      content: appendCtasToContent(
+        buildScheduleConfirmMessage(compliance),
+        ['[HEALLY_CTA:generate_schedule|Ya, buatkan jadwal]']
+      ),
+      needsVerif: false,
+      provider: 'heally-rules',
+      model: 'schedule-confirm',
+      thinkingSummary: 'Konfirmasi buat jadwal',
+      thinkingDetail: getScheduleThinkingSteps().join('\n'),
+    };
+  }
+
+  if (wantsSchedule && !scheduleReady) {
+    await setPendingScheduleIntent(userId, today, true);
+    return {
+      content: appendCtasToContent(
+        buildScheduleWaitingMessage(compliance),
+        buildHeallyCtas(compliance, userMessage)
+      ),
+      needsVerif: false,
+      provider: 'heally-rules',
+      model: 'compliance-gate',
+      thinkingSummary: 'Menunggu screening PTM & catatan harian',
+      thinkingDetail: [
+        'Memeriksa kelengkapan screening PTM',
+        'Memeriksa catatan harian',
+        'Menyiapkan langkah berikutnya',
+      ].join('\n'),
+    };
   }
 
   const llm = getLlmProvider();
@@ -151,8 +169,11 @@ export async function chatWithHeally(
     lower.includes('konsultasikan dengan dokter') ||
     /\b(dosis|interaksi obat)\b/i.test(content);
 
+  const ctas = buildHeallyCtas(compliance, userMessage);
+  const contentWithCtas = appendCtasToContent(content, ctas);
+
   return {
-    content,
+    content: contentWithCtas,
     needsVerif,
     provider: result.provider,
     model: result.model,
@@ -162,96 +183,124 @@ export async function chatWithHeally(
 }
 
 /**
- * OCR medical document image
+ * Parse medical document image via Groq Vision (Qwen multimodal).
  */
-export async function ocrMedicalDocument(imageBase64: string, mimeType = 'image/jpeg'): Promise<{
+export async function parseMedicalRecordFromImage(
+  userId: number | undefined,
+  imageBase64: string,
+  mimeType = 'image/jpeg'
+): Promise<StandardMedicalRecord> {
+  return parseMedicalDocumentVision(userId, imageBase64, mimeType);
+}
+
+/** @deprecated use parseMedicalRecordFromImage — kept for records route compat */
+export async function ocrMedicalDocument(
+  imageBase64: string,
+  mimeType = 'image/jpeg',
+  userId?: number
+): Promise<{
   extractedText: string;
   title: string;
   summary: string;
   tags: string[];
   recordType: string;
+  isMedicalDocument?: boolean;
+  documentKind?: string;
+  rejectionReason?: string | null;
+  doctorName?: string | null;
+  recordDate?: string | null;
 }> {
-  const prompt = `Kamu adalah sistem OCR untuk dokumen medis Indonesia. Analisis gambar ini dan:
-
-1. Ekstrak SEMUA teks yang terlihat dari dokumen
-2. Identifikasi jenis dokumen (hasil lab, resep, catatan dokter, dll)
-3. Buat judul singkat dokumen
-4. Buat ringkasan 1-2 kalimat dalam bahasa Indonesia
-5. Berikan 2-4 tag relevan (contoh: Laboratorium, Hipertensi, Resep)
-
-Balas HANYA dalam format JSON berikut:
-{
-  "extractedText": "teks lengkap yang diekstrak",
-  "title": "judul dokumen",
-  "summary": "ringkasan singkat",
-  "tags": ["tag1", "tag2"],
-  "recordType": "image"
-}`;
-
-  const rawResponse = await generateTextWithImage(prompt, imageBase64, mimeType);
-
-  try {
-    // Extract JSON from response
-    const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-  } catch {
-    // fallback
-  }
-
-  return {
-    extractedText: rawResponse,
-    title: 'Dokumen Medis',
-    summary: 'Dokumen medis yang diunggah',
-    tags: ['Dokumen'],
-    recordType: 'image',
-  };
+  const parsed = await parseMedicalDocumentVision(userId, imageBase64, mimeType);
+  return standardRecordToLegacyOcr(parsed);
 }
 
 /**
- * Generate AI daily health schedule
+ * Generate AI daily health schedule (food / exercise / water; pills manual-only for mobile)
  */
-export async function generateSchedule(userId: number): Promise<Array<{
-  type: string;
-  label: string;
-  detail: string;
-  time: string;
-  colorScheme: string;
-}>> {
-  const [clinicalContext, behaviour, profile] = await Promise.all([
+export type GenerateScheduleInput = {
+  date?: string;
+  screeningSummary?: string;
+  dailyLogsSummary?: string;
+  healthContext?: string;
+  manualPills?: Array<{ label: string; detail?: string | null; time: string }>;
+};
+
+export async function generateSchedule(
+  userId: number,
+  input: GenerateScheduleInput = {}
+): Promise<{
+  items: Array<{
+    type: string;
+    label: string;
+    detail: string;
+    time: string;
+    colorScheme: string;
+  }>;
+  warnings: string[];
+}> {
+  const [clinicalContext, behaviour, profile, compliance] = await Promise.all([
     buildClinicalContextForProvider(userId),
     buildBehaviourContext(userId),
     loadPrivacyProfile(userId),
+    getDailyCompliance(userId, input.date ?? new Date().toISOString().slice(0, 10)),
   ]);
+
+  const screeningBlock =
+    input.screeningSummary ??
+    (compliance?.ptmFactors.length
+      ? formatPtmFactorsForLlm(compliance.ptmFactors)
+      : 'Screening PTM belum tersedia — gunakan pola hidup sehat umum.');
+
+  const logsBlock =
+    input.dailyLogsSummary ??
+    (compliance && compliance.dailyLogs.length > 0
+      ? formatDailyLogsForLlm(compliance.dailyLogs, profile)
+      : compliance && compliance.dailyLogCount > 0
+        ? `Catatan hari ini: ${compliance.dailyLogCount} entri (ringkasan agregat).`
+        : 'Belum ada catatan harian hari ini.');
+
+  const pillsBlock =
+    input.manualPills?.length
+      ? input.manualPills
+          .map((p) => `- ${p.label} (${p.time}): ${p.detail ?? ''}`)
+          .join('\n')
+      : 'Tidak ada obat manual — jangan buat jadwal pill baru.';
+
   const today = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
   let prompt = `${clinicalContext}
 
 ${behaviour.text}
 
+KONTEKS HARIAN:
+${screeningBlock}
+${logsBlock}
+
+OBAT MANUAL (jangan ubah/ditambah AI):
+${pillsBlock}
+
+${input.healthContext ? `REKAM MEDIS RINGKAS:\n${input.healthContext.slice(0, 4000)}` : ''}
+
 Tanggal: ${today}
 
-Buatkan jadwal harian yang komprehensif dan personal untuk pasien ini. Jadwal harus mencakup:
-- Waktu makan (sarapan, makan siang, makan malam, snack jika perlu)
-- Jadwal obat berdasarkan kondisi dan obat aktif
-- Olahraga yang sesuai kondisi
-- Pengingat minum air
+Buatkan jadwal harian personal. WAJIB:
+- Sesuaikan olahraga & pola makan dengan faktor PTM di atas
+- Tambahkan item harian spesifik jika ada faktor (mis. kurang aktivitas → jalan 15–20 menit)
+- Hanya food, exercise, water — JANGAN pill (obat manual sudah ada)
+- 8–12 item, urut waktu
 
-Balas HANYA dalam format JSON array berikut (8-12 item):
+Balas HANYA JSON array:
 [
   {
-    "type": "food|pill|exercise|water",
+    "type": "food|exercise|water",
     "label": "nama aktivitas",
     "detail": "detail singkat",
     "time": "HH:MM",
     "colorScheme": "orange|blue|green|cyan|yellow"
   }
-]
-
-Urutkan berdasarkan waktu. Pastikan jadwal obat sesuai petunjuk medis (pagi/malam, sebelum/sesudah makan).`;
+]`;
 
   if (shouldSanitizeForLlm()) {
     prompt = sanitizeTextForLlm(prompt, profile);
@@ -262,20 +311,36 @@ Urutkan berdasarkan waktu. Pastikan jadwal obat sesuai petunjuk medis (pagi/mala
   try {
     const jsonMatch = rawResponse.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]) as Array<{
+        type: string;
+        label: string;
+        detail: string;
+        time: string;
+        colorScheme: string;
+      }>;
+      const items = parsed.filter((item) => ['food', 'exercise', 'water'].includes(item.type));
+      return {
+        items,
+        warnings: items.length < parsed.length
+          ? ['Jadwal obat tidak dibuat oleh AI — tetap ikuti obat manual Anda.']
+          : [],
+      };
     }
   } catch {
     // fallback
   }
 
-  // Default schedule
-  return [
-    { type: 'food', label: 'Sarapan', detail: 'Makanan bergizi seimbang', time: '07:00', colorScheme: 'orange' },
-    { type: 'water', label: 'Minum Air', detail: '2 gelas (500ml)', time: '09:00', colorScheme: 'cyan' },
-    { type: 'food', label: 'Makan Siang', detail: 'Nasi + sayur + protein', time: '12:00', colorScheme: 'orange' },
-    { type: 'water', label: 'Minum Air', detail: '2 gelas (500ml)', time: '15:00', colorScheme: 'cyan' },
-    { type: 'food', label: 'Makan Malam', detail: 'Porsi lebih kecil, kaya serat', time: '18:00', colorScheme: 'orange' },
-  ];
+  return {
+    items: [
+      { type: 'food', label: 'Sarapan', detail: 'Makanan bergizi seimbang', time: '07:00', colorScheme: 'orange' },
+      { type: 'water', label: 'Minum Air', detail: '2 gelas (500ml)', time: '09:00', colorScheme: 'cyan' },
+      { type: 'exercise', label: 'Jalan kaki', detail: '15–20 menit ringan', time: '10:00', colorScheme: 'green' },
+      { type: 'food', label: 'Makan Siang', detail: 'Nasi + sayur + protein', time: '12:00', colorScheme: 'orange' },
+      { type: 'water', label: 'Minum Air', detail: '2 gelas (500ml)', time: '15:00', colorScheme: 'cyan' },
+      { type: 'food', label: 'Makan Malam', detail: 'Porsi lebih kecil, kaya serat', time: '18:00', colorScheme: 'orange' },
+    ],
+    warnings: [],
+  };
 }
 
 /**

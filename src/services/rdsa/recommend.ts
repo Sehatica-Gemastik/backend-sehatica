@@ -7,6 +7,11 @@ import {
   heallyAsks,
 } from '../../db/schema';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import {
+  getDailyCompliance,
+  scheduleFlagsFromSnapshot,
+  shouldSuppressArm,
+} from '../heally/daily-compliance';
 
 export type RecommendContext = {
   localHour?: number;
@@ -98,15 +103,23 @@ export async function getEligibleArms(userId: number, ctx: RecommendContext) {
     where: eq(notificationArms.enabled, true),
   });
 
+  const today = new Date().toISOString().slice(0, 10);
+  const compliance = await getDailyCompliance(userId, today);
+
   const userSchedules = await db.query.schedules.findMany({
     where: eq(schedules.userId, userId),
     limit: 50,
   });
-  const hasPill = userSchedules.some((s) => s.type === 'pill');
-  const hasExercise = userSchedules.some((s) => s.type === 'exercise');
-  const hasFood = userSchedules.some((s) => s.type === 'food');
-  const hasWater = userSchedules.some((s) => s.type === 'water');
-  const hasMissed = userSchedules.some((s) => !s.done);
+
+  const snapshotFlags = compliance?.scheduleSnapshot.length
+    ? scheduleFlagsFromSnapshot(compliance.scheduleSnapshot)
+    : null;
+
+  const hasPill = snapshotFlags?.hasPill ?? userSchedules.some((s) => s.type === 'pill');
+  const hasExercise = snapshotFlags?.hasExercise ?? userSchedules.some((s) => s.type === 'exercise');
+  const hasFood = snapshotFlags?.hasFood ?? userSchedules.some((s) => s.type === 'food');
+  const hasWater = snapshotFlags?.hasWater ?? userSchedules.some((s) => s.type === 'water');
+  const hasMissed = snapshotFlags?.hasMissed ?? userSchedules.some((s) => !s.done);
 
   const preferred = new Set(
     ctx.forceIntent ? [ctx.forceIntent] : [...hourToIntents(hour), 'ask.checkin', 'insight.tip']
@@ -114,6 +127,7 @@ export async function getEligibleArms(userId: number, ctx: RecommendContext) {
 
   return allArms.filter((arm) => {
     if (ctx.forceIntent) return arm.intent === ctx.forceIntent;
+    if (shouldSuppressArm(arm, compliance)) return false;
     if (!preferred.has(arm.intent)) return false;
     if (arm.intent === 'schedule.pill' && !hasPill) return false;
     if (arm.intent === 'schedule.exercise' && !hasExercise) return false;

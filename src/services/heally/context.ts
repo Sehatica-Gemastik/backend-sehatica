@@ -172,6 +172,9 @@ PANDUAN PENTING:
    - Baris peringatan diawali [PERINGATAN] (tanpa emoji)
 6. Batasi respons maksimal 400 kata
 7. Darurat medis → arahkan ke IGD/dokter
+8. Jadwal harian dibuat per hari (food/exercise/water) berdasarkan screening PTM & catatan harian — obat manual tidak dibuat AI
+9. Jika pasien belum screening PTM / catatan hari ini, arahkan lewat CTA (bukan teks panjang)
+10. Format CTA opsional di akhir respons (server menambahkan): [HEALLY_CTA:generate_schedule|...] [HEALLY_CTA:open_screening|...] [HEALLY_CTA:open_daily_log|...]
 
 Jika model reasoning aktif, pisahkan proses berpikir dari jawaban akhir. Jawaban ke user harus langsung actionable.`;
 }
@@ -180,8 +183,8 @@ Jika model reasoning aktif, pisahkan proses berpikir dari jawaban akhir. Jawaban
 export function getThinkingDraftSteps(): string[] {
   return [
     'Memeriksa rekam medis & kondisi…',
+    'Membaca screening PTM & catatan hari ini…',
     'Menilai jadwal obat hari ini…',
-    'Membaca pola aktivitas & ask terakhir…',
     'Menyusun jawaban personal…',
   ];
 }

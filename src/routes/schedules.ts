@@ -5,6 +5,8 @@ import { eq, desc, and } from 'drizzle-orm';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 import { generateSchedule } from '../services/ai';
+import { persistGeneratedSchedule } from '../services/heally/schedule-persist';
+import { setPendingScheduleIntent } from '../services/heally/daily-compliance';
 
 const schedulesRoute = new Hono();
 
@@ -112,46 +114,41 @@ schedulesRoute.delete('/:id', async (c) => {
   }
 });
 
-// POST /schedules/ai-generate — generate AI schedule for today
+// POST /schedules/ai-generate — generate AI schedule for a date
 schedulesRoute.post('/ai-generate', async (c) => {
   try {
     const userId = c.get('userId') as number;
-    const today = todayStr();
+    const body = await c.req.json().catch(() => ({})) as {
+      date?: string;
+      timezone?: string;
+      healthContext?: string;
+      screeningSummary?: string;
+      dailyLogsSummary?: string;
+      explicitMedicationInstructions?: Array<{
+        label: string;
+        detail?: string | null;
+        time: string;
+      }>;
+    };
 
-    // Delete existing AI-generated schedules for today
-    const existingAi = await db.query.schedules.findMany({
-      where: and(
-        eq(schedules.userId, userId),
-        eq(schedules.scheduleDate, today),
-        eq(schedules.isAiGenerated, true)
-      ),
+    const date = body.date ?? todayStr();
+
+    const generated = await generateSchedule(userId, {
+      date,
+      healthContext: body.healthContext,
+      screeningSummary: body.screeningSummary,
+      dailyLogsSummary: body.dailyLogsSummary,
+      manualPills: body.explicitMedicationInstructions,
     });
 
-    for (const s of existingAi) {
-      await db.delete(schedules).where(eq(schedules.id, s.id));
-    }
+    const safeItems = generated.items.filter((item) =>
+      ['food', 'exercise', 'water'].includes(item.type)
+    );
 
-    // Generate new schedule
-    const aiSchedule = await generateSchedule(userId);
+    await persistGeneratedSchedule(userId, date, safeItems);
+    await setPendingScheduleIntent(userId, date, false);
 
-    // Insert all items
-    const insertedItems = [];
-    for (const item of aiSchedule) {
-      const color = colorMap[item.colorScheme] ?? colorMap.blue;
-      const [inserted] = await db.insert(schedules).values({
-        userId,
-        type: item.type as any,
-        label: item.label,
-        detail: item.detail,
-        time: item.time,
-        scheduleDate: today,
-        isAiGenerated: true,
-        colorScheme: color,
-      }).returning();
-      insertedItems.push(inserted);
-    }
-
-    return successResponse(c, insertedItems, 201);
+    return successResponse(c, { items: safeItems, warnings: generated.warnings }, 201);
   } catch (err) {
     console.error('AI generate error:', err);
     return errorResponse(c, 'Gagal generate jadwal AI', 500);

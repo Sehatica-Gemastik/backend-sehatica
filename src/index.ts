@@ -11,6 +11,8 @@ import heally from './routes/heally';
 import verif from './routes/verif';
 import doctors from './routes/doctors';
 import home from './routes/home';
+import health from './routes/health';
+import ai from './routes/ai';
 
 const app = new Hono();
 
@@ -47,6 +49,8 @@ api.route('/heally', heally);
 api.route('/verif', verif);
 api.route('/doctors', doctors);
 api.route('/home', home);
+api.route('/health', health);
+api.route('/ai', ai);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────
 app.notFound((c) => {

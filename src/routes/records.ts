@@ -119,17 +119,27 @@ records.post('/ocr', async (c) => {
       return errorResponse(c, 'Data gambar diperlukan');
     }
 
-    // Run OCR via Gemini Vision
-    const ocrResult = await ocrMedicalDocument(imageBase64, mimeType);
+    // Run vision parse via Groq (Qwen multimodal)
+    const ocrResult = await ocrMedicalDocument(imageBase64, mimeType, userId);
+
+    if (ocrResult.isMedicalDocument === false) {
+      return errorResponse(
+        c,
+        ocrResult.rejectionReason ?? 'Gambar bukan dokumen medis',
+        422
+      );
+    }
 
     // Save record
     const [record] = await db.insert(medicalRecords).values({
       userId,
-      type: 'image',
+      type: (ocrResult.recordType as 'consultation' | 'image' | 'note') ?? 'image',
       title: ocrResult.title,
       content: ocrResult.extractedText,
       summary: ocrResult.summary,
       tags: ocrResult.tags,
+      doctorName: ocrResult.doctorName ?? null,
+      recordDate: ocrResult.recordDate ?? null,
       isAiSummarized: true,
     }).returning();
 

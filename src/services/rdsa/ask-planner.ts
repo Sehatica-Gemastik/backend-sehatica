@@ -7,6 +7,10 @@ import {
 } from '../../db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { recommendArm, recordSelection, recordReward } from './recommend';
+import {
+  appendAskCtas,
+  getDailyCompliance,
+} from '../heally/daily-compliance';
 
 function renderTemplate(text: string, name?: string | null): string {
   const suffix = name ? `, ${name.split(' ')[0]}` : '';
@@ -50,6 +54,8 @@ export async function planAndDeliverAsk(
   const body = renderTemplate(selected.body, user?.name);
   const askId = newAskId();
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const today = new Date().toISOString().slice(0, 10);
+  const compliance = await getDailyCompliance(userId, today);
 
   const [ask] = await db
     .insert(heallyAsks)
@@ -67,7 +73,8 @@ export async function planAndDeliverAsk(
     })
     .returning();
 
-  const chatContent = `**${title}**\n\n${body}`;
+  let chatContent = `**${title}**\n\n${body}`;
+  chatContent = appendAskCtas(chatContent, body, compliance);
   const [message] = await db
     .insert(chatMessages)
     .values({
