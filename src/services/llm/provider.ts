@@ -51,9 +51,9 @@ export interface LlmProvider {
 }
 
 const DUMMY_REPLIES = [
-  'Halo! Saya Heally (mode dummy). Saya sudah menerima pesanmu. Set LLM_PROVIDER + API key di .env untuk balasan cloud.',
-  'Heally dummy: catatan diterima. Coba tanya soal jadwal obat, rekam medis, atau gejala.',
-  'Mode development aktif. Backend sudah tersambung ke konfigurasi LLM via env.',
+  'Mode dummy aktif. Set LLM_PROVIDER + API key di .env untuk fitur vision rekam medis.',
+  'Backend tersambung. LLM cloud diperlukan untuk parse dokumen medis.',
+  'Mode development aktif. Konfigurasi LLM via env.',
 ];
 
 function pickDummy(seed: string): string {
@@ -72,14 +72,11 @@ export const dummyProvider: LlmProvider = {
     const lower = userMessage.toLowerCase();
     let text = pickDummy(userMessage + systemInstruction);
     if (lower.includes('obat')) {
-      text =
-        'Heally dummy: ingat minum obat sesuai jadwal di app. Jika ragu dosis, minta verifikasi dokter partner. [PERINGATAN]';
+      text = 'Dummy: ingat minum obat sesuai jadwal di app. Jika ragu dosis, konsultasi dokter.';
     } else if (lower.includes('jadwal') || lower.includes('olahraga')) {
-      text =
-        'Heally dummy: kamu bisa generate jadwal di tab Jadwal. Tandai selesai agar progress terupdate.';
+      text = 'Dummy: generate jadwal di tab Jadwal. Tandai selesai agar progress terupdate.';
     } else if (lower.includes('gejala') || lower.includes('pusing')) {
-      text =
-        'Heally dummy: catat gejala di rekam medis. Jika memberat, hubungi dokter. Ini bukan diagnosis.';
+      text = 'Dummy: catat gejala di rekam medis. Jika memberat, hubungi dokter.';
     }
     return { text, provider: 'dummy', model: llmConfig.model || 'dummy-local' };
   },

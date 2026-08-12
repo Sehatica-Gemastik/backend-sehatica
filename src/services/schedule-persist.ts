@@ -1,5 +1,5 @@
-import { db } from '../../db';
-import { schedules } from '../../db/schema';
+import { db } from '../db';
+import { schedules } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
 
 const colorMap: Record<string, string> = {
@@ -53,28 +53,4 @@ export async function persistGeneratedSchedule(
   }
 
   return safeItems;
-}
-
-export function formatScheduleChatMessage(
-  items: GeneratedScheduleItem[],
-  warnings: string[] = []
-): string {
-  const lines = items
-    .slice(0, 12)
-    .map((item) => `- **${item.time}** ${item.label}${item.detail ? ` — ${item.detail}` : ''}`)
-    .join('\n');
-
-  let body = `## Jadwal harian sudah dibuat
-
-Berdasarkan **screening PTM** dan **catatan hari ini**, saya menambahkan **${items.length}** aktivitas:
-
-${lines || '- (tidak ada item baru)'}
-
-Buka tab **Jadwal** untuk melihat dan centang saat selesai.`;
-
-  if (warnings.length > 0) {
-    body += `\n\n_${warnings.join(' ')}_`;
-  }
-
-  return body;
 }

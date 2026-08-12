@@ -100,18 +100,6 @@ export function sanitizeTextForLlm(text: string, profile: PrivacyProfile): strin
   return out;
 }
 
-export function sanitizeChatHistory(
-  history: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }>,
-  profile: PrivacyProfile
-): Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> {
-  return history.map((turn) => ({
-    role: turn.role,
-    parts: turn.parts.map((part) => ({
-      text: sanitizeTextForLlm(part.text, profile),
-    })),
-  }));
-}
-
 /** Approximate record date for LLM (month + year only). */
 export function approximateRecordDate(recordDate: string | null, createdAt: Date): string {
   if (recordDate) {

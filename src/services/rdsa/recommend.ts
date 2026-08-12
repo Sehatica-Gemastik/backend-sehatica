@@ -4,18 +4,18 @@ import {
   notificationArmStatistics,
   notificationEvents,
   schedules,
-  heallyAsks,
+  rdsaAsks,
 } from '../../db/schema';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import {
   getDailyCompliance,
   scheduleFlagsFromSnapshot,
   shouldSuppressArm,
-} from '../heally/daily-compliance';
+} from '../compliance/daily-compliance';
 
 export type RecommendContext = {
   localHour?: number;
-  channel?: 'push' | 'chat' | 'whatsapp';
+  channel?: 'push' | 'whatsapp';
   forceIntent?: string;
 };
 
@@ -32,9 +32,9 @@ export type ScoredArm = {
 const PRIOR = 0.5;
 const TEMPERATURE = Number(process.env.RDSA_SOFTMAX_TEMPERATURE ?? '0.35');
 const RECENCY_HALF_LIFE_DAYS = Number(process.env.RDSA_RECENCY_HALF_LIFE_DAYS ?? '3');
-const MAX_ASKS_PER_DAY = Number(process.env.HEALLY_MAX_ASKS_PER_DAY ?? '5');
-const QUIET_START = Number(process.env.HEALLY_QUIET_HOURS_START ?? '22');
-const QUIET_END = Number(process.env.HEALLY_QUIET_HOURS_END ?? '6');
+const MAX_ASKS_PER_DAY = Number(process.env.RDSA_MAX_ASKS_PER_DAY ?? '5');
+const QUIET_START = Number(process.env.RDSA_QUIET_HOURS_START ?? '22');
+const QUIET_END = Number(process.env.RDSA_QUIET_HOURS_END ?? '6');
 
 function differenceScore(muPlus: number, muMinus: number): number {
   return muPlus - muMinus;
@@ -81,7 +81,7 @@ function inQuietHours(hour: number): boolean {
 }
 
 /**
- * Eligibility before RDSA (Heally_Plan + RDSA sleeping arms).
+ * Eligibility before RDSA smart notifications.
  */
 export async function getEligibleArms(userId: number, ctx: RecommendContext) {
   const hour = ctx.localHour ?? new Date().getHours();
@@ -92,9 +92,9 @@ export async function getEligibleArms(userId: number, ctx: RecommendContext) {
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);
   const todaysAsks = await db
-    .select({ id: heallyAsks.id })
-    .from(heallyAsks)
-    .where(and(eq(heallyAsks.userId, userId), gte(heallyAsks.createdAt, dayStart)));
+    .select({ id: rdsaAsks.id })
+    .from(rdsaAsks)
+    .where(and(eq(rdsaAsks.userId, userId), gte(rdsaAsks.createdAt, dayStart)));
   if (todaysAsks.length >= MAX_ASKS_PER_DAY && !ctx.forceIntent) {
     return [];
   }
@@ -128,15 +128,17 @@ export async function getEligibleArms(userId: number, ctx: RecommendContext) {
   return allArms.filter((arm) => {
     if (ctx.forceIntent) return arm.intent === ctx.forceIntent;
     if (shouldSuppressArm(arm, compliance)) return false;
+    // RDSA push-only — skip legacy chat / verif arms
+    if (!arm.channels.includes('push')) return false;
+    if (arm.intent.startsWith('chat.') || arm.intent.startsWith('verif.')) return false;
     if (!preferred.has(arm.intent)) return false;
     if (arm.intent === 'schedule.pill' && !hasPill) return false;
     if (arm.intent === 'schedule.exercise' && !hasExercise) return false;
     if (arm.intent === 'schedule.food' && !hasFood) return false;
     if (arm.intent === 'schedule.water' && !hasWater) return false;
     if (arm.intent === 'nudge.missed' && !hasMissed) return false;
-    if (ctx.channel && !(arm.channels.includes(ctx.channel) || arm.channels.includes('push'))) {
-      return false;
-    }
+    const channel = ctx.channel ?? 'push';
+    if (!arm.channels.includes(channel)) return false;
     return true;
   });
 }

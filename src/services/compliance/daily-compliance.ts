@@ -1,6 +1,6 @@
 import { db } from '../../db';
-import { chatMessages, userDailyCompliance } from '../../db/schema';
-import { and, desc, eq } from 'drizzle-orm';
+import { userDailyCompliance } from '../../db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export type ScheduleSnapshotItem = {
   type: string;
@@ -25,7 +25,6 @@ export type DailySyncPayload = {
   ptmFactors?: string[];
   dailyLogs?: DailyLogSnapshot[];
   scheduleSnapshot?: ScheduleSnapshotItem[];
-  checkResume?: boolean;
 };
 
 export type DailyComplianceRow = {
@@ -37,12 +36,6 @@ export type DailyComplianceRow = {
   pendingScheduleIntent: boolean;
 };
 
-export type ScheduleConfirmPromptResult = {
-  confirmPromptSent: true;
-  messageId: number;
-  content: string;
-};
-
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -50,12 +43,6 @@ function todayStr(): string {
 export function isSchedulePrerequisitesMet(compliance: DailyComplianceRow | null): boolean {
   if (!compliance) return false;
   return compliance.ptmScreeningDone && compliance.dailyLogCount >= 1;
-}
-
-export function isScheduleIntentMessage(message: string): boolean {
-  return /jadwal|schedule|rutin harian|buatkan.*(makan|olahraga)|generate.*schedule/i.test(
-    message
-  );
 }
 
 export function parseComplianceRow(
@@ -126,37 +113,6 @@ export function formatDailyLogsForContext(logs: DailyLogSnapshot[]): string {
       return `- ${log.time} [${log.type}] ${log.title}${qty}${detail}`;
     })
     .join('\n');
-}
-
-export function buildDailyHealthContextText(compliance: DailyComplianceRow | null, date: string): string {
-  if (!compliance) {
-    return `
-KONTEKS HARIAN (${date}):
-- Screening PTM: belum diisi
-- Catatan harian: belum ada
-- Jadwal AI hari ini: belum dibuat
-`.trim();
-  }
-
-  const screeningLine = compliance.ptmScreeningDone
-    ? `sudah diisi — faktor: ${compliance.ptmFactors.join(', ') || 'tidak ada'}`
-    : 'belum diisi';
-
-  const logsLine =
-    compliance.dailyLogCount > 0
-      ? `${compliance.dailyLogCount} entri`
-      : 'belum ada';
-
-  const aiSchedule = compliance.scheduleSnapshot.some((s) => s.isAiGenerated);
-
-  return `
-KONTEKS HARIAN (${date}):
-- Screening PTM: ${screeningLine}
-- Catatan harian: ${logsLine}
-${compliance.dailyLogCount > 0 ? formatDailyLogsForContext(compliance.dailyLogs) : ''}
-- Jadwal AI hari ini: ${aiSchedule ? 'sudah ada' : 'belum dibuat'}
-- Menunggu kelengkapan untuk buat jadwal: ${compliance.pendingScheduleIntent ? 'ya' : 'tidak'}
-`.trim();
 }
 
 export async function setPendingScheduleIntent(
@@ -230,62 +186,6 @@ export async function upsertDailyCompliance(userId: number, payload: DailySyncPa
   return created;
 }
 
-export async function tryScheduleReadyConfirmation(
-  userId: number,
-  date: string
-): Promise<ScheduleConfirmPromptResult | null> {
-  const row = await db.query.userDailyCompliance.findFirst({
-    where: and(
-      eq(userDailyCompliance.userId, userId),
-      eq(userDailyCompliance.complianceDate, date)
-    ),
-  });
-  const compliance = parseComplianceRow(row);
-  if (!compliance?.pendingScheduleIntent || !isSchedulePrerequisitesMet(compliance)) {
-    return null;
-  }
-
-  const recent = await db.query.chatMessages.findMany({
-    where: eq(chatMessages.userId, userId),
-    orderBy: [desc(chatMessages.createdAt)],
-    limit: 12,
-  });
-  const alreadyPrompted = recent.some(
-    (msg) =>
-      msg.role === 'assistant' &&
-      msg.content.includes('Apakah mau saya buatkan jadwal') &&
-      msg.createdAt.toISOString().slice(0, 10) === date
-  );
-  if (alreadyPrompted) return null;
-
-  const content = appendCtasToContent(
-    buildScheduleConfirmMessage(compliance),
-    ['[HEALLY_CTA:generate_schedule|Ya, buatkan jadwal]']
-  );
-
-  const [aiMsg] = await db
-    .insert(chatMessages)
-    .values({
-      userId,
-      role: 'assistant',
-      content,
-      needsVerif: false,
-      thinkingSummary: 'Konfirmasi buat jadwal',
-      thinkingDetail: [
-        'Memverifikasi screening PTM',
-        'Memverifikasi catatan harian',
-        'Menyiapkan konfirmasi jadwal',
-      ].join('\n'),
-    })
-    .returning();
-
-  return {
-    confirmPromptSent: true,
-    messageId: aiMsg.id,
-    content,
-  };
-}
-
 const DAILY_LOG_HINTS = [
   'catatan hari',
   'catat gejala',
@@ -301,7 +201,7 @@ const DAILY_LOG_HINTS = [
   'balas singkat saja',
   'cerita singkat',
   'kondisi hari ini',
-  'mau heally catat',
+  'mau sehatica catat',
 ];
 
 const PTM_HINTS = [
@@ -346,74 +246,4 @@ export function scheduleFlagsFromSnapshot(snapshot: ScheduleSnapshotItem[]) {
     hasMissed: snapshot.some((s) => !s.done),
     hasAiGenerated: snapshot.some((s) => s.isAiGenerated),
   };
-}
-
-export function buildHeallyCtas(
-  compliance: DailyComplianceRow | null,
-  userMessage?: string
-): string[] {
-  const ctas: string[] = [];
-  const wantsSchedule = isScheduleIntentMessage(userMessage ?? '');
-  const ready = isSchedulePrerequisitesMet(compliance);
-
-  if (!compliance?.ptmScreeningDone) {
-    ctas.push('[HEALLY_CTA:open_screening|Isi screening risiko PTM]');
-  }
-  if ((compliance?.dailyLogCount ?? 0) < 1) {
-    ctas.push('[HEALLY_CTA:open_daily_log|Catat aktivitas hari ini]');
-  }
-  if (ready && (wantsSchedule || compliance?.pendingScheduleIntent)) {
-    ctas.push('[HEALLY_CTA:generate_schedule|Ya, buatkan jadwal]');
-  }
-  return ctas;
-}
-
-export function appendCtasToContent(content: string, ctas: string[]): string {
-  if (ctas.length === 0) return content;
-  const block = ctas.join('\n');
-  if (content.includes('[HEALLY_CTA:')) return content;
-  return `${content.trim()}\n\n${block}`;
-}
-
-export function appendAskCtas(content: string, body: string, compliance: DailyComplianceRow | null): string {
-  if (/jadwal|olahraga ringan|jadwalmu/i.test(body)) {
-    if (isSchedulePrerequisitesMet(compliance)) {
-      return appendCtasToContent(content, ['[HEALLY_CTA:generate_schedule|Buat jadwal sekarang]']);
-    }
-  }
-  return content;
-}
-
-export function buildScheduleConfirmMessage(compliance: DailyComplianceRow | null): string {
-  const factorCount = compliance?.ptmFactors.length ?? 0;
-  const logCount = compliance?.dailyLogCount ?? 0;
-  const factorLine =
-    factorCount > 0
-      ? `${factorCount} faktor risiko PTM perlu diperhatikan`
-      : 'screening PTM selesai tanpa faktor tambahan';
-
-  return `Screening dan catatan hari ini sudah lengkap (${factorLine}, ${logCount} catatan).
-
-**Apakah mau saya buatkan jadwal harian** berdasarkan data tersebut?`;
-}
-
-export function buildScheduleWaitingMessage(compliance: DailyComplianceRow | null): string {
-  const missing: string[] = [];
-  if (!compliance?.ptmScreeningDone) missing.push('**screening risiko PTM**');
-  if ((compliance?.dailyLogCount ?? 0) < 1) missing.push('**catatan hari ini**');
-
-  if (missing.length === 0) {
-    return 'Data sudah lengkap. Buka chat ini lagi nanti — saya akan konfirmasi apakah Anda ingin jadwal dibuat.';
-  }
-
-  return `Sebelum jadwal bisa dibuat, lengkapi dulu ${missing.join(' dan ')}. Setelah selesai, saya akan **konfirmasi** apakah Anda ingin jadwal dibuat — tidak otomatis.`;
-}
-
-export function getScheduleThinkingSteps(): string[] {
-  return [
-    'Membaca screening risiko PTM…',
-    'Membaca catatan harian…',
-    'Menyusun jadwal makan & olahraga…',
-    'Menyesuaikan dengan kondisi pasien…',
-  ];
 }

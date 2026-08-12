@@ -9,21 +9,15 @@ const doctorsRoute = new Hono();
 
 doctorsRoute.use('*', authMiddleware);
 
-function formatDoctor(d: any, isYours = false) {
+function formatDoctor(d: any) {
   return {
     id: d.id,
     name: d.user?.name ?? 'Dokter',
     email: d.user?.email,
     specialty: d.specialty,
-    rating: parseFloat(d.rating ?? '5.0'),
-    reviewCount: d.reviewCount,
-    verifiedCount: d.verifiedCount,
     isAvailable: d.isAvailable,
-    bio: d.bio,
     avatarInitials: d.user?.avatarInitials ?? 'DR',
-    colorScheme: 'blue',
     qrPayload: `sehatica:doctor:${d.id}`,
-    isYours,
   };
 }
 
@@ -59,31 +53,7 @@ function parseDoctorCode(raw: string): number | null {
   return null;
 }
 
-// GET /doctors — all doctors (partners flagged)
-doctorsRoute.get('/', async (c) => {
-  try {
-    const userId = c.get('userId') as number;
-
-    const allDoctors = await db.query.doctors.findMany({
-      with: { user: true },
-      orderBy: [desc(doctors.verifiedCount)],
-    });
-
-    const links = await db.query.userDoctors.findMany({
-      where: eq(userDoctors.userId, userId),
-    });
-    const partnerIds = new Set(links.map((l) => l.doctorId));
-
-    return successResponse(
-      c,
-      allDoctors.map((d: any) => formatDoctor(d, partnerIds.has(d.id)))
-    );
-  } catch {
-    return errorResponse(c, 'Gagal mengambil daftar dokter', 500);
-  }
-});
-
-// GET /doctors/partners — only linked partners
+// GET /doctors/partners — linked partners only
 doctorsRoute.get('/partners', async (c) => {
   try {
     const userId = c.get('userId') as number;
@@ -97,7 +67,7 @@ doctorsRoute.get('/partners', async (c) => {
       c,
       links
         .filter((l: any) => l.doctor)
-        .map((l: any) => formatDoctor(l.doctor, true))
+        .map((l: any) => formatDoctor(l.doctor))
     );
   } catch {
     return errorResponse(c, 'Gagal mengambil dokter partner', 500);
@@ -136,21 +106,17 @@ doctorsRoute.post('/partners', async (c) => {
     if (existing) {
       return successResponse(c, {
         alreadyLinked: true,
-        doctor: formatDoctor(doctor, true),
+        doctor: formatDoctor(doctor),
       });
     }
 
-    await db.insert(userDoctors).values({
-      userId,
-      doctorId,
-      isPrimary: false,
-    });
+    await db.insert(userDoctors).values({ userId, doctorId });
 
     return successResponse(
       c,
       {
         alreadyLinked: false,
-        doctor: formatDoctor(doctor, true),
+        doctor: formatDoctor(doctor),
       },
       201
     );

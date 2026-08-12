@@ -1,36 +1,18 @@
 import {
   getLlmProvider,
-  dummyProvider,
-  LlmRateLimitError,
-  LlmAuthError,
 } from './llm/provider';
 import {
   buildClinicalContextForProvider,
   buildBehaviourContext,
-  getHeallySystemPrompt,
-  summarizeThinking,
-} from './heally/context';
+} from './llm/clinical-context';
 import {
-  buildDailyHealthContextForLlm,
   formatDailyLogsForLlm,
   formatPtmFactorsForLlm,
   loadPrivacyProfile,
-  sanitizeChatHistory,
   sanitizeTextForLlm,
   shouldSanitizeForLlm,
-} from './heally/privacy';
-import {
-  appendCtasToContent,
-  buildDailyHealthContextText,
-  buildHeallyCtas,
-  buildScheduleConfirmMessage,
-  buildScheduleWaitingMessage,
-  getDailyCompliance,
-  getScheduleThinkingSteps,
-  isScheduleIntentMessage,
-  isSchedulePrerequisitesMet,
-  setPendingScheduleIntent,
-} from './heally/daily-compliance';
+} from './llm/privacy';
+import { getDailyCompliance } from './compliance/daily-compliance';
 import {
   parseMedicalDocumentVision,
   standardRecordToLegacyOcr,
@@ -44,143 +26,6 @@ async function generateText(prompt: string, systemInstruction?: string): Promise
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────
-
-/**
- * Chat with Heally AI
- */
-export async function chatWithHeally(
-  userId: number,
-  conversationHistory: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }>,
-  userMessage: string
-): Promise<{
-  content: string;
-  needsVerif: boolean;
-  provider: string;
-  model: string;
-  thinkingSummary: string | null;
-  thinkingDetail: string | null;
-}> {
-  const [clinicalContext, behaviour, profile] = await Promise.all([
-    buildClinicalContextForProvider(userId),
-    buildBehaviourContext(userId),
-    loadPrivacyProfile(userId),
-  ]);
-  const today = new Date().toISOString().slice(0, 10);
-  const compliance = await getDailyCompliance(userId, today);
-  const dailyHealthContext = shouldSanitizeForLlm()
-    ? buildDailyHealthContextForLlm(compliance, profile, today)
-    : buildDailyHealthContextText(compliance, today);
-  let systemInstruction = getHeallySystemPrompt(
-    clinicalContext,
-    `${behaviour.text}\n\n${dailyHealthContext}`
-  );
-  let safeHistory = conversationHistory;
-  let safeMessage = userMessage;
-
-  if (shouldSanitizeForLlm()) {
-    systemInstruction = sanitizeTextForLlm(systemInstruction, profile);
-    safeHistory = sanitizeChatHistory(conversationHistory, profile);
-    safeMessage = sanitizeTextForLlm(userMessage, profile);
-  }
-
-  const wantsSchedule = isScheduleIntentMessage(userMessage);
-  const scheduleReady = isSchedulePrerequisitesMet(compliance);
-
-  if (wantsSchedule && scheduleReady) {
-    await setPendingScheduleIntent(userId, today, true);
-    return {
-      content: appendCtasToContent(
-        buildScheduleConfirmMessage(compliance),
-        ['[HEALLY_CTA:generate_schedule|Ya, buatkan jadwal]']
-      ),
-      needsVerif: false,
-      provider: 'heally-rules',
-      model: 'schedule-confirm',
-      thinkingSummary: 'Konfirmasi buat jadwal',
-      thinkingDetail: getScheduleThinkingSteps().join('\n'),
-    };
-  }
-
-  if (wantsSchedule && !scheduleReady) {
-    await setPendingScheduleIntent(userId, today, true);
-    return {
-      content: appendCtasToContent(
-        buildScheduleWaitingMessage(compliance),
-        buildHeallyCtas(compliance, userMessage)
-      ),
-      needsVerif: false,
-      provider: 'heally-rules',
-      model: 'compliance-gate',
-      thinkingSummary: 'Menunggu screening PTM & catatan harian',
-      thinkingDetail: [
-        'Memeriksa kelengkapan screening PTM',
-        'Memeriksa catatan harian',
-        'Menyiapkan langkah berikutnya',
-      ].join('\n'),
-    };
-  }
-
-  const llm = getLlmProvider();
-
-  let result;
-  try {
-    result = await llm.generateChat(systemInstruction, safeHistory, safeMessage);
-  } catch (err) {
-    if (llm.name !== 'dummy' && (err instanceof LlmRateLimitError || err instanceof LlmAuthError)) {
-      const reason =
-        err instanceof LlmAuthError
-          ? err.message
-          : `Kuota ${llm.name} sementara penuh. Tunggu ~1 menit lalu coba lagi.`;
-      console.warn(`[heally] ${llm.name} unavailable —`, reason);
-      const fallback = await dummyProvider.generateChat(
-        systemInstruction,
-        safeHistory,
-        safeMessage
-      );
-      result = {
-        text: `*${reason}*\n\n${fallback.text}`,
-        provider: 'dummy-fallback',
-        model: 'dummy-local',
-        thinkingDetail: behaviour.summaryLines.join('\n'),
-        thinkingSummary: behaviour.summaryLines[0] ?? 'Konteks perilaku lokal',
-      };
-    } else {
-      throw err;
-    }
-  }
-
-  let thinkingDetail = result.thinkingDetail ?? null;
-  let thinkingSummary = result.thinkingSummary ?? null;
-
-  // synthesize thinking preview from behaviour when model returns none
-  if (!thinkingDetail && behaviour.summaryLines.length > 0) {
-    thinkingDetail = behaviour.summaryLines.join('\n');
-    thinkingSummary = behaviour.summaryLines[0];
-  } else if (thinkingDetail && !thinkingSummary) {
-    thinkingSummary = summarizeThinking(thinkingDetail);
-  }
-
-  const content = result.text;
-
-  const lower = content.toLowerCase();
-  const needsVerif =
-    content.includes('[PERINGATAN]') ||
-    lower.includes('verifikasi dokter') ||
-    lower.includes('konsultasikan dengan dokter') ||
-    /\b(dosis|interaksi obat)\b/i.test(content);
-
-  const ctas = buildHeallyCtas(compliance, userMessage);
-  const contentWithCtas = appendCtasToContent(content, ctas);
-
-  return {
-    content: contentWithCtas,
-    needsVerif,
-    provider: result.provider,
-    model: result.model,
-    thinkingSummary,
-    thinkingDetail,
-  };
-}
 
 /**
  * Parse medical document image via Groq Vision (Qwen multimodal).

@@ -1,6 +1,6 @@
 import { isDummyLlm, llmConfig } from '../../config/llm';
 import { getLlmProvider, LlmAuthError, LlmRateLimitError } from '../llm/provider';
-import { loadPrivacyProfile, sanitizeTextForLlm, shouldSanitizeForLlm } from '../heally/privacy';
+import { loadPrivacyProfile, sanitizeTextForLlm, shouldSanitizeForLlm } from '../llm/privacy';
 import {
   normalizeStandardMedicalRecord,
   serializeStandardMedicalRecord,

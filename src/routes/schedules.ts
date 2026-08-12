@@ -5,8 +5,8 @@ import { eq, desc, and } from 'drizzle-orm';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 import { generateSchedule } from '../services/ai';
-import { persistGeneratedSchedule } from '../services/heally/schedule-persist';
-import { setPendingScheduleIntent } from '../services/heally/daily-compliance';
+import { persistGeneratedSchedule } from '../services/schedule-persist';
+import { setPendingScheduleIntent } from '../services/compliance/daily-compliance';
 
 const schedulesRoute = new Hono();
 

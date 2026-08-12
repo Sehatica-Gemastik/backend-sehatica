@@ -6,9 +6,8 @@ import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 import {
   upsertDailyCompliance,
-  tryScheduleReadyConfirmation,
   type DailySyncPayload,
-} from '../services/heally/daily-compliance';
+} from '../services/compliance/daily-compliance';
 
 const health = new Hono();
 
@@ -51,20 +50,10 @@ health.post('/daily-sync', async (c) => {
       scheduleSnapshot: Array.isArray(body.scheduleSnapshot) ? body.scheduleSnapshot : [],
     });
 
-    const confirmPrompt = body.checkResume
-      ? await tryScheduleReadyConfirmation(userId, body.date)
-      : null;
-
     return successResponse(c, {
       date: row.complianceDate,
       syncedAt: row.syncedAt,
       wasPendingSchedule,
-      confirmPrompt: confirmPrompt
-        ? {
-            sent: true,
-            messageId: confirmPrompt.messageId,
-          }
-        : null,
     });
   } catch (err) {
     console.error('Daily sync error:', err);

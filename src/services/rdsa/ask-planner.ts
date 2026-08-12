@@ -1,16 +1,11 @@
 import { db } from '../../db';
 import {
-  heallyAsks,
-  chatMessages,
+  rdsaAsks,
   notificationEvents,
   users,
 } from '../../db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { recommendArm, recordSelection, recordReward } from './recommend';
-import {
-  appendAskCtas,
-  getDailyCompliance,
-} from '../heally/daily-compliance';
 
 function renderTemplate(text: string, name?: string | null): string {
   const suffix = name ? `, ${name.split(' ')[0]}` : '';
@@ -25,8 +20,7 @@ function newAskId(): string {
 }
 
 export type DeliveredAsk = {
-  ask: typeof heallyAsks.$inferSelect;
-  message: typeof chatMessages.$inferSelect;
+  ask: typeof rdsaAsks.$inferSelect;
   notification: {
     title: string;
     body: string;
@@ -35,7 +29,7 @@ export type DeliveredAsk = {
 };
 
 /**
- * Plan + deliver one Heally Ask into in-app chat (push payload for mobile).
+ * Plan + deliver one smart notification (push payload for mobile).
  * Recommendation (RDSA) stays separate from channel delivery.
  */
 export async function planAndDeliverAsk(
@@ -45,7 +39,7 @@ export async function planAndDeliverAsk(
   const selected = await recommendArm(userId, {
     localHour: options?.localHour,
     forceIntent: options?.forceIntent,
-    channel: 'chat',
+    channel: 'push',
   });
   if (!selected) return null;
 
@@ -54,11 +48,9 @@ export async function planAndDeliverAsk(
   const body = renderTemplate(selected.body, user?.name);
   const askId = newAskId();
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const today = new Date().toISOString().slice(0, 10);
-  const compliance = await getDailyCompliance(userId, today);
 
   const [ask] = await db
-    .insert(heallyAsks)
+    .insert(rdsaAsks)
     .values({
       id: askId,
       userId,
@@ -67,29 +59,11 @@ export async function planAndDeliverAsk(
       title,
       body,
       status: 'delivered',
-      channels: ['push', 'chat'],
+      channels: ['push'],
       deliveredAt: new Date(),
       expiresAt,
     })
     .returning();
-
-  let chatContent = `**${title}**\n\n${body}`;
-  chatContent = appendAskCtas(chatContent, body, compliance);
-  const [message] = await db
-    .insert(chatMessages)
-    .values({
-      userId,
-      role: 'assistant',
-      content: chatContent,
-      needsVerif: false,
-      askId,
-    })
-    .returning();
-
-  await db
-    .update(heallyAsks)
-    .set({ messageId: message.id })
-    .where(eq(heallyAsks.id, askId));
 
   await db.insert(notificationEvents).values({
     userId,
@@ -106,69 +80,58 @@ export async function planAndDeliverAsk(
   await recordSelection(selected.armId);
 
   return {
-    ask: { ...ask, messageId: message.id },
-    message,
+    ask,
     notification: { title, body, askId },
   };
 }
 
 export async function listPendingAsks(userId: number) {
-  return db.query.heallyAsks.findMany({
+  return db.query.rdsaAsks.findMany({
     where: and(
-      eq(heallyAsks.userId, userId),
-      inArray(heallyAsks.status, ['pending', 'delivered'])
+      eq(rdsaAsks.userId, userId),
+      inArray(rdsaAsks.status, ['pending', 'delivered'])
     ),
   });
 }
 
 export async function acknowledgeAsk(userId: number, askId: string) {
-  const ask = await db.query.heallyAsks.findFirst({
-    where: and(eq(heallyAsks.id, askId), eq(heallyAsks.userId, userId)),
+  const ask = await db.query.rdsaAsks.findFirst({
+    where: and(eq(rdsaAsks.id, askId), eq(rdsaAsks.userId, userId)),
   });
   if (!ask) return null;
+
+  let updated = ask;
+
   if (ask.status === 'pending') {
-    const [updated] = await db
-      .update(heallyAsks)
+    const [delivered] = await db
+      .update(rdsaAsks)
       .set({ status: 'delivered', deliveredAt: new Date() })
-      .where(eq(heallyAsks.id, askId))
+      .where(eq(rdsaAsks.id, askId))
       .returning();
-    return updated;
-  }
-  return ask;
-}
-
-/** Binary reward v1: reply within window = 1, else caller may pass 0 on expire. */
-export async function rewardAskOnUserReply(userId: number, askId?: string | null) {
-  let ask =
-    askId != null
-      ? await db.query.heallyAsks.findFirst({
-          where: and(eq(heallyAsks.id, askId), eq(heallyAsks.userId, userId)),
-        })
-      : null;
-
-  if (!ask) {
-    // attribute to latest unreplied delivered ask (2h window)
-    const recent = await listPendingAsks(userId);
-    const cutoff = Date.now() - 2 * 60 * 60 * 1000;
-    ask =
-      recent
-        .filter((a) => a.status === 'delivered' && a.deliveredAt && a.deliveredAt.getTime() >= cutoff)
-        .sort((a, b) => (b.deliveredAt?.getTime() ?? 0) - (a.deliveredAt?.getTime() ?? 0))[0] ?? null;
+    updated = delivered;
   }
 
-  if (!ask || ask.status === 'replied') return null;
+  if (updated.status !== 'replied' && !updated.reward) {
+    const reward = 1;
 
-  const reward = 1;
-  await db
-    .update(heallyAsks)
-    .set({ status: 'replied', repliedAt: new Date(), reward: String(reward) })
-    .where(eq(heallyAsks.id, ask.id));
+    const [rewarded] = await db
+      .update(rdsaAsks)
+      .set({
+        status: 'replied',
+        repliedAt: new Date(),
+        reward: String(reward),
+      })
+      .where(eq(rdsaAsks.id, askId))
+      .returning();
 
-  await db
-    .update(notificationEvents)
-    .set({ reward: String(reward), rewardRecordedAt: new Date() })
-    .where(eq(notificationEvents.askId, ask.id));
+    await db
+      .update(notificationEvents)
+      .set({ reward: String(reward), rewardRecordedAt: new Date() })
+      .where(eq(notificationEvents.askId, askId));
 
-  await recordReward(ask.armId, reward, true);
-  return ask;
+    await recordReward(updated.armId, reward, true);
+    return rewarded;
+  }
+
+  return updated;
 }

@@ -3,8 +3,7 @@ import {
   medicalRecords,
   schedules,
   users,
-  heallyAsks,
-  chatMessages,
+  rdsaAsks,
   notificationEvents,
 } from '../../db/schema';
 import { eq, desc, and, gte } from 'drizzle-orm';
@@ -74,8 +73,7 @@ export async function buildClinicalContextForProvider(userId: number): Promise<s
 }
 
 /**
- * Lightweight behavioural context from existing DB (v1 — no behaviour_events table yet).
- * Aligns with Heally_Plan §4 using schedules, asks, chat, RDSA events.
+ * Lightweight behavioural context from existing DB (schedules, asks, RDSA events).
  */
 export async function buildBehaviourContext(userId: number): Promise<{
   text: string;
@@ -83,17 +81,12 @@ export async function buildBehaviourContext(userId: number): Promise<{
 }> {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [schedulesList, asks, recentUserMsgs, recentEvents] = await Promise.all([
+  const [schedulesList, asks, recentEvents] = await Promise.all([
     db.query.schedules.findMany({ where: eq(schedules.userId, userId), limit: 40 }),
-    db.query.heallyAsks.findMany({
-      where: eq(heallyAsks.userId, userId),
-      orderBy: [desc(heallyAsks.createdAt)],
+    db.query.rdsaAsks.findMany({
+      where: eq(rdsaAsks.userId, userId),
+      orderBy: [desc(rdsaAsks.createdAt)],
       limit: 20,
-    }),
-    db.query.chatMessages.findMany({
-      where: and(eq(chatMessages.userId, userId), eq(chatMessages.role, 'user')),
-      orderBy: [desc(chatMessages.createdAt)],
-      limit: 1,
     }),
     db.query.notificationEvents.findMany({
       where: and(eq(notificationEvents.userId, userId), gte(notificationEvents.sentAt, weekAgo)),
@@ -117,9 +110,11 @@ export async function buildBehaviourContext(userId: number): Promise<{
 
   const pendingAsks = asks.filter((a) => a.status === 'delivered').length;
 
-  const lastUserMsg = recentUserMsgs[0];
-  const silenceDays = lastUserMsg
-    ? Math.floor((Date.now() - new Date(lastUserMsg.createdAt).getTime()) / (86400000))
+  const lastReplied = repliedAsks.sort(
+    (a, b) => (b.repliedAt?.getTime() ?? 0) - (a.repliedAt?.getTime() ?? 0)
+  )[0];
+  const silenceDays = lastReplied?.repliedAt
+    ? Math.floor((Date.now() - lastReplied.repliedAt.getTime()) / 86400000)
     : null;
 
   const hour = new Date().getHours();
@@ -127,14 +122,14 @@ export async function buildBehaviourContext(userId: number): Promise<{
   if (adherenceRate !== null) {
     summaryLines.push(`Kepatuhan jadwal hari ini: ${doneToday}/${totalToday} (${adherenceRate}%)`);
   }
-  if (pendingAsks > 0) summaryLines.push(`${pendingAsks} ask Heally menunggu balasan`);
+  if (pendingAsks > 0) summaryLines.push(`${pendingAsks} notifikasi menunggu ack`);
   if (silenceDays !== null && silenceDays > 0) {
-    summaryLines.push(`Diam ${silenceDays} hari sejak chat terakhir`);
+    summaryLines.push(`Diam ${silenceDays} hari sejak ack notifikasi terakhir`);
   }
   if (appReplyRate !== null) {
-    summaryLines.push(`Reply rate ask app (rolling): ${appReplyRate}%`);
+    summaryLines.push(`Ack rate notifikasi (rolling): ${appReplyRate}%`);
   }
-  summaryLines.push(`Jam lokal: ${hour}:00 · channel utama: app (WhatsApp belum aktif)`);
+  summaryLines.push(`Jam lokal: ${hour}:00 · channel utama: push`);
   if (recentEvents.length > 0) {
     summaryLines.push(`Notifikasi/RDSA 7 hari: ${recentEvents.length} event`);
   }
@@ -142,55 +137,12 @@ export async function buildBehaviourContext(userId: number): Promise<{
   const text = `
 KONTEKS PERILAKU (derived v1):
 - Kepatuhan jadwal hari ini: ${adherenceRate !== null ? `${adherenceRate}% (${doneToday}/${totalToday})` : 'belum ada jadwal'}
-- Ask pending: ${pendingAsks}
-- Hari sejak balasan chat terakhir: ${silenceDays ?? 0}
-- Reply rate ask in-app: ${appReplyRate !== null ? `${appReplyRate}%` : 'belum cukup data'}
+- Notifikasi pending ack: ${pendingAsks}
+- Hari sejak ack notifikasi terakhir: ${silenceDays ?? 0}
+- Ack rate notifikasi: ${appReplyRate !== null ? `${appReplyRate}%` : 'belum cukup data'}
 - Notifikasi terkirim 7 hari: ${recentEvents.length}
-- Prefer channel: app (WA sync belum live)
+- Prefer channel: push
 `.trim();
 
   return { text, summaryLines };
-}
-
-export function getHeallySystemPrompt(clinicalContext: string, behaviourContext: string): string {
-  return `Kamu adalah Heally, asisten kesehatan AI dari aplikasi Sehatica yang cerdas, empatik, dan selalu membantu.
-
-${clinicalContext}
-
-${behaviourContext}
-
-PANDUAN PENTING:
-1. Gunakan bahasa Indonesia yang ramah, jelas, dan mudah dipahami
-2. Personalisasi respons berdasarkan rekam medis, jadwal, DAN sinyal perilaku di atas
-3. Untuk saran medis spesifik (dosis, terapi, lab), WAJIB tambahkan baris:
-   [PERINGATAN] Saran ini dihasilkan AI dan perlu diverifikasi dokter sebelum diterapkan.
-4. Jangan pernah menggantikan konsultasi dokter
-5. Format respons dengan markdown standar:
-   - gunakan ## untuk judul bagian dan - untuk bullet
-   - **bold** untuk poin penting
-   - code fence (tiga backtick) untuk contoh kode / dosis jika perlu
-   - Baris peringatan diawali [PERINGATAN] (tanpa emoji)
-6. Batasi respons maksimal 400 kata
-7. Darurat medis → arahkan ke IGD/dokter
-8. Jadwal harian dibuat per hari (food/exercise/water) berdasarkan screening PTM & catatan harian — obat manual tidak dibuat AI
-9. Jika pasien belum screening PTM / catatan hari ini, arahkan lewat CTA (bukan teks panjang)
-10. Format CTA opsional di akhir respons (server menambahkan): [HEALLY_CTA:generate_schedule|...] [HEALLY_CTA:open_screening|...] [HEALLY_CTA:open_daily_log|...]
-
-Jika model reasoning aktif, pisahkan proses berpikir dari jawaban akhir. Jawaban ke user harus langsung actionable.`;
-}
-
-/** Steps shown in UI while waiting (matches context we inject). */
-export function getThinkingDraftSteps(): string[] {
-  return [
-    'Memeriksa rekam medis & kondisi…',
-    'Membaca screening PTM & catatan hari ini…',
-    'Menilai jadwal obat hari ini…',
-    'Menyusun jawaban personal…',
-  ];
-}
-
-export function summarizeThinking(detail: string): string {
-  const cleaned = detail.replace(/\s+/g, ' ').trim();
-  if (!cleaned) return 'Proses berpikir Heally';
-  return cleaned.length > 72 ? `${cleaned.slice(0, 69)}…` : cleaned;
 }
