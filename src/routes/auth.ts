@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { doctors, users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { hashPassword, verifyPassword, generateAvatarInitials } from '../utils/password';
 import { signAccessToken, signRefreshToken, verifyToken } from '../utils/jwt';
@@ -67,6 +67,66 @@ auth.post('/register', async (c) => {
   }
 });
 
+// POST /auth/register-doctor — web doctor portal signup
+auth.post('/register-doctor', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { name, email, password, phone, specialty, bio } = body;
+
+    if (!name || !email || !password || !specialty) {
+      return errorResponse(c, 'Nama, email, password, dan spesialisasi wajib diisi');
+    }
+
+    if (password.length < 8) {
+      return errorResponse(c, 'Password minimal 8 karakter');
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const existing = await db.query.users.findFirst({ where: eq(users.email, normalizedEmail) });
+    if (existing) {
+      return errorResponse(c, 'Email sudah terdaftar', 409);
+    }
+
+    const passwordHash = hashPassword(password);
+    const avatarInitials = generateAvatarInitials(name);
+    const tempRefresh = await signRefreshToken(0);
+
+    const [newUser] = await db.insert(users).values({
+      name: String(name).trim(),
+      email: normalizedEmail,
+      passwordHash,
+      role: 'doctor',
+      avatarInitials,
+      phone: phone ? String(phone).trim() : null,
+      refreshToken: tempRefresh,
+    }).returning();
+
+    await db.insert(doctors).values({
+      userId: newUser.id,
+      specialty: String(specialty).trim(),
+      bio: bio ? String(bio).trim() : null,
+      isAvailable: true,
+    });
+
+    const accessToken = await signAccessToken({
+      sub: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+    });
+    const refreshToken = await signRefreshToken(newUser.id);
+    await db.update(users).set({ refreshToken }).where(eq(users.id, newUser.id));
+
+    return successResponse(c, {
+      user: formatUserResponse(newUser),
+      accessToken,
+      refreshToken,
+    }, 201);
+  } catch (err) {
+    console.error('Register doctor error:', err);
+    return errorResponse(c, 'Terjadi kesalahan server', 500);
+  }
+});
+
 // POST /auth/login
 auth.post('/login', async (c) => {
   try {
@@ -101,6 +161,17 @@ auth.post('/login', async (c) => {
     });
   } catch (err) {
     console.error('Login error:', err);
+    return errorResponse(c, 'Terjadi kesalahan server', 500);
+  }
+});
+
+// POST /auth/logout
+auth.post('/logout', authMiddleware, async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    await db.update(users).set({ refreshToken: null, updatedAt: new Date() }).where(eq(users.id, userId));
+    return successResponse(c, { ok: true });
+  } catch {
     return errorResponse(c, 'Terjadi kesalahan server', 500);
   }
 });

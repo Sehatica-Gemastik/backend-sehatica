@@ -53,7 +53,7 @@ function parseDoctorCode(raw: string): number | null {
   return null;
 }
 
-// GET /doctors/partners — linked partners only
+// GET /doctors/partners — linked partners only (mobile)
 doctorsRoute.get('/partners', async (c) => {
   try {
     const userId = c.get('userId') as number;

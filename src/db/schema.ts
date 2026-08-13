@@ -35,6 +35,17 @@ export const askStatusEnum = pgEnum('ask_status', [
   'dismissed',
 ]);
 export const chatMessageRoleEnum = pgEnum('chat_message_role', ['user', 'doctor']);
+export const safetyLevelEnum = pgEnum('safety_level', ['general', 'review', 'urgent']);
+export const reviewScopeEnum = pgEnum('review_scope', ['bubble', 'session', 'history']);
+export const reviewTypeEnum = pgEnum('review_type', ['paid', 'voluntary']);
+export const requestStatusEnum = pgEnum('request_status', [
+  'open_pool',
+  'permission_requested',
+  'accepted',
+  'declined',
+]);
+export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'revised']);
+export const itemStatusEnum = pgEnum('item_status', ['pending', 'approved', 'revised']);
 
 // ── Users ──────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
@@ -68,6 +79,11 @@ export const doctors = pgTable('doctors', {
     .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   specialty: varchar('specialty', { length: 100 }).notNull(),
+  bio: text('bio'),
+  feePerQna: numeric('fee_per_qna', { precision: 12, scale: 2 }).default('25000').notNull(),
+  rating: numeric('rating', { precision: 3, scale: 2 }).default('0').notNull(),
+  reviewCount: integer('review_count').default(0).notNull(),
+  verifiedCount: integer('verified_count').default(0).notNull(),
   isAvailable: boolean('is_available').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -244,6 +260,46 @@ export const doctorChatMessages = pgTable('doctor_chat_messages', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// ── Doctor reviews (web portal) ────────────────────────────────────────────
+export const reviews = pgTable('reviews', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  doctorId: integer('doctor_id').references(() => doctors.id, { onDelete: 'set null' }),
+  patientQuestion: text('patient_question').notNull(),
+  aiResponse: text('ai_response').notNull(),
+  safetyLevel: safetyLevelEnum('safety_level').default('general').notNull(),
+  patientNote: text('patient_note'),
+  reviewScope: reviewScopeEnum('review_scope').default('bubble').notNull(),
+  reviewType: reviewTypeEnum('review_type').default('voluntary').notNull(),
+  requestStatus: requestStatusEnum('request_status').default('open_pool').notNull(),
+  isPaid: boolean('is_paid').default(false).notNull(),
+  qnaCount: integer('qna_count').default(1).notNull(),
+  fee: numeric('fee', { precision: 12, scale: 2 }).default('0').notNull(),
+  status: reviewStatusEnum('status').default('pending').notNull(),
+  doctorNote: text('doctor_note'),
+  doctorSummaryNote: text('doctor_summary_note'),
+  consentedAt: timestamp('consented_at').defaultNow().notNull(),
+  decidedAt: timestamp('decided_at'),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const reviewItems = pgTable('review_items', {
+  id: serial('id').primaryKey(),
+  reviewId: integer('review_id')
+    .references(() => reviews.id, { onDelete: 'cascade' })
+    .notNull(),
+  clientMessageId: integer('client_message_id').notNull(),
+  patientQuestion: text('patient_question').notNull(),
+  aiResponse: text('ai_response').notNull(),
+  safetyLevel: safetyLevelEnum('safety_level').default('general').notNull(),
+  doctorItemNote: text('doctor_item_note'),
+  itemStatus: itemStatusEnum('item_status').default('pending').notNull(),
+});
+
 // ── Daily Insights ─────────────────────────────────────────────────────────
 export const dailyInsights = pgTable('daily_insights', {
   id: serial('id').primaryKey(),
@@ -265,12 +321,14 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   userDoctors: many(userDoctors),
   rdsaAsks: many(rdsaAsks),
   notificationEvents: many(notificationEvents),
+  reviews: many(reviews),
 }));
 
 export const doctorsRelations = relations(doctors, ({ one, many }) => ({
   user: one(users, { fields: [doctors.userId], references: [users.id] }),
   userDoctors: many(userDoctors),
   chatMessages: many(doctorChatMessages),
+  reviews: many(reviews),
 }));
 
 export const userDoctorsRelations = relations(userDoctors, ({ one }) => ({
@@ -295,6 +353,16 @@ export const doctorChatMessagesRelations = relations(doctorChatMessages, ({ one 
   doctor: one(doctors, { fields: [doctorChatMessages.doctorId], references: [doctors.id] }),
 }));
 
+export const reviewsRelations = relations(reviews, ({ one, many }) => ({
+  user: one(users, { fields: [reviews.userId], references: [users.id] }),
+  doctor: one(doctors, { fields: [reviews.doctorId], references: [doctors.id] }),
+  items: many(reviewItems),
+}));
+
+export const reviewItemsRelations = relations(reviewItems, ({ one }) => ({
+  review: one(reviews, { fields: [reviewItems.reviewId], references: [reviews.id] }),
+}));
+
 // ── Type Exports ───────────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -306,3 +374,5 @@ export type NotificationArm = typeof notificationArms.$inferSelect;
 export type RdsaAsk = typeof rdsaAsks.$inferSelect;
 export type DoctorChatMessage = typeof doctorChatMessages.$inferSelect;
 export type RecordTransfer = typeof recordTransfers.$inferSelect;
+export type Review = typeof reviews.$inferSelect;
+export type ReviewItem = typeof reviewItems.$inferSelect;
