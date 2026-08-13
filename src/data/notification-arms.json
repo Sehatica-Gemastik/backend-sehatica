@@ -1,0 +1,3732 @@
+[
+  {
+    "arm_id": "sched_pill_001",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Waktunya obat",
+    "body": "Saatnya minum obat{{detail}}. Tandai selesai kalau sudah ya.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_002",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Pengingat obat",
+    "body": "{{label}} jam {{time}} — jangan sampai terlewat.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_003",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Obat menunggu",
+    "body": "Sehatica ingat: {{label}} belum ditandai selesai.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_004",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Sedikit lagi",
+    "body": "Sekilas saja — minum obat sesuai jadwal {{time}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_005",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Untuk konsistensi",
+    "body": "Rutin obat bantu pemulihan. Cek {{label}} sekarang.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_006",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Halo dari Sehatica",
+    "body": "Pengingat lembut: {{label}} pukul {{time}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_007",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Jangan lupa",
+    "body": "Obat {{label}} sudah waktunya.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_008",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Cek jadwal",
+    "body": "Ada obat yang perlu diminum: {{label}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_009",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Satu langkah sehat",
+    "body": "Minum obat sekarang biar streak jadwal tetap jalan.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_010",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Sudah minum {{label}}? Balas atau tandai di app.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_011",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Pengingat singkat",
+    "body": "{{time}} · {{label}}",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_012",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Tetap on track",
+    "body": "Jadwal obatmu masih menunggu konfirmasi.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_013",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Sebelum sibuk",
+    "body": "Ambil 10 detik untuk obat {{label}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_014",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Malam ini penting",
+    "body": "Obat malam: {{label}}. Sudah?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_015",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Pagi dimulai",
+    "body": "Obat pagi {{label}} siap dikonfirmasi.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_016",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Sehatica cek: obat {{label}} belum selesai.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_017",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Kalau belum minum {{label}}, sekarang waktu yang bagus.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_018",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Kesehatanmu prioritas — {{label}} jam {{time}}.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_019",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Satu centang kecil: {{label}}.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_020",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Pengingat dari jadwalmu: {{label}}.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_021",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Masih sempat: tandai {{label}} sudah diminum.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_022",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Sehatica di sini supaya {{label}} tidak terlupakan.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_023",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Obat terjadwal menunggu balasanmu.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_024",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Buka Sehatica dan selesaikan {{label}}.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_pill_025",
+    "intent": "schedule.pill",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat obat",
+    "body": "Yuk selesaikan obat {{label}} sebelum lupa.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_001",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Waktunya makan",
+    "body": "Jadwal makan: {{label}} pukul {{time}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_002",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat makan",
+    "body": "Sudah makan sesuai rencana? {{label}}",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_003",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Nutrisi dulu",
+    "body": "Sehatica ingat jadwal makanmu: {{label}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_004",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Jeda sehat",
+    "body": "Saatnya {{label}}. Tandai jika sudah.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_005",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Makan teratur",
+    "body": "Pola makan rutin membantu. Cek {{label}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_006",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Halo lapar?",
+    "body": "Jadwal {{label}} sudah masuk.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_007",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Konsistensi",
+    "body": "Tandai {{label}} supaya Sehatica bisa bantu lebih akurat.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_008",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Reminder lembut",
+    "body": "{{time}} · jangan lewatkan {{label}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_009",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Dari jadwalmu",
+    "body": "Aktivitas makan: {{label}}.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_010",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Sudah {{label}}? Balas di chat atau WA.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_011",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jadwal makan",
+    "body": "Makan sesuai jadwal bantu energi stabil. {{label}}",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_012",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jadwal makan",
+    "body": "Cek {{label}} — sudah atau belum?",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_013",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jadwal makan",
+    "body": "Pengingat singkat: {{label}} jam {{time}}.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_014",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jadwal makan",
+    "body": "Satu langkah: selesaikan jadwal makan {{label}}.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_food_015",
+    "intent": "schedule.food",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jadwal makan",
+    "body": "Sehatica jaga ritme makamu hari ini.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_001",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Saatnya minum air. {{detail}}",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_002",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Hidrasi dulu — {{label}}.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_003",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Segelas air untuk tubuhmu sekarang.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_004",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Sehatica: jangan lupa minum air.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_005",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Pengingat air: {{time}}.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_006",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Tubuhmu butuh cairan. Tandai {{label}}.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_007",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Minum air sebentar, lanjut aktivitas.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_008",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Streak hidrasi menunggu satu centang.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_009",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Air dulu, baru sibuk lagi.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_010",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Reminder lembut: minum air sekarang.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_011",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Sudah minum air belum? {{label}}",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_012",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Sehatica jaga agar kamu tidak dehidrasi.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_013",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Satu teguk besar sekarang juga.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_014",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Jadwal air {{time}} sudah tiba.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_water_015",
+    "intent": "schedule.water",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Minum air",
+    "body": "Hidrasi = fokus lebih baik. Yuk minum.",
+    "tone": "playful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_001",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Gerak sebentar",
+    "body": "Jadwal olahraga: {{label}} pukul {{time}}.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_002",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Waktunya aktif",
+    "body": "{{label}} menunggu. Bisa singkat saja.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_003",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Badan kaku?",
+    "body": "Sehatica usul: mulai {{label}} sekarang.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_004",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Olahraga ringan",
+    "body": "Selesaikan {{label}} biar jadwal hari ini lengkap.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_005",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Energi naik",
+    "body": "Saatnya {{label}}.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_006",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Konsistensi gerak",
+    "body": "Jangan skip {{label}} hari ini.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_007",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat gerak",
+    "body": "{{time}} · {{label}}",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_008",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Sudah olahraga ({{label}})?",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_009",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Langkah kecil",
+    "body": "5–10 menit {{label}} sudah berarti.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_010",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Dari jadwalmu",
+    "body": "Aktivitas: {{label}}.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_011",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Olahraga",
+    "body": "Gerakan ringan lebih baik daripada tidak sama sekali: {{label}}.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_012",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Olahraga",
+    "body": "Sehatica siap dampingi setelah {{label}} selesai.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_013",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Olahraga",
+    "body": "Tandai {{label}} kalau sudah bergerak.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_014",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Olahraga",
+    "body": "Olahraga terjadwal: {{label}}.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_exercise_015",
+    "intent": "schedule.exercise",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Olahraga",
+    "body": "Yuk selesaikan {{label}} sebelum hari berakhir.",
+    "tone": "motivating",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_001",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jadwal menunggu",
+    "body": "Ada aktivitas belum selesai hari ini.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_002",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Progress hari ini",
+    "body": "{{done}}/{{total}} selesai. Yuk lanjut.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_003",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Hampir selesai",
+    "body": "Tinggal sedikit lagi dari jadwal hari ini.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_004",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Satu item tersisa",
+    "body": "Selesaikan sisa jadwal supaya 100%.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_005",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Ringkasan sore",
+    "body": "Cek sisa jadwal sebelum malam.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_006",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Ringkasan malam",
+    "body": "Masih ada jadwal belum ditandai.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_007",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Mulai hari",
+    "body": "Lihat jadwal pagi milikmu.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_008",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Sehatica update",
+    "body": "Jadwalmu butuh sedikit perhatian.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_009",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Jangan biarkan menumpuk",
+    "body": "Selesaikan satu item jadwal sekarang.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "sched_progress_010",
+    "intent": "schedule.progress",
+    "channels": [
+      "push",
+      "system"
+    ],
+    "title": "Kembali ke ritme",
+    "body": "Buka jadwal dan centang yang sudah dilakukan.",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_001",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Cek kondisi",
+    "body": "Bagaimana perasaanmu hari ini?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_002",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica penasaran",
+    "body": "Ada keluhan yang perlu dibahas?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_003",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Check-in singkat",
+    "body": "Skala 1–5, energimu hari ini berapa?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_004",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Kabarin Sehatica",
+    "body": "Sudah lebih baik dibanding kemarin?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_005",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Satu pertanyaan",
+    "body": "Tidurmu semalam cukup?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_006",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Halo {{name}}",
+    "body": "Mau cerita singkat soal kondisi hari ini?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_007",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica di sini",
+    "body": "Kalau ada gejala baru, bilang saja.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_008",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Update cepat",
+    "body": "Nyeri / pusing / lelah — ada yang muncul?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_009",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Jaga-jaga",
+    "body": "Ada yang terasa tidak biasa hari ini?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_010",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Obrolan singkat",
+    "body": "Sehatica siap dengarkan 1 menit saja.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_011",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Kondisi malam",
+    "body": "Sebelum istirahat, ada yang ingin dicatat?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_012",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Kondisi pagi",
+    "body": "Mulai hari: badan terasa oke?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_013",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Follow-up",
+    "body": "Kemarin kamu bilang {{topic}}. Sekarang bagaimana?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_014",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Cek kepatuhan",
+    "body": "Obat kemarin semua diminum?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_015",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Catatan kesehatan",
+    "body": "Mau Sehatica catat gejala hari ini?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_016",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Tanya kecil",
+    "body": "Nafsu makanmu hari ini bagaimana?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_017",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Tanya kecil",
+    "body": "Tekanan / detak — sudah diukur?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_018",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Tanya kecil",
+    "body": "Sudah minum air cukup hari ini?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_019",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Dampingi",
+    "body": "Kalau bingung soal jadwal, tanya Sehatica.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_020",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Akurasi saran",
+    "body": "Update kondisi biar saran Sehatica lebih pas.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_021",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Sehatica mau pastikan: ada gejala yang mengkhawatirkan?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_022",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Balas singkat saja — baik / biasa / kurang fit.",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_023",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Kalau lagi oke, cukup bilang “baik”.",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_024",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Kalau kurang fit, ceritakan gejalanya.",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_025",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Satu kata pun membantu Sehatica memahami harimu.",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_026",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Ada yang ingin diverifikasi dokter lewat Sehatica?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_027",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Mau review singkat rekam medis terakhir?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_028",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Perlu Sehatica cek interaksi obat?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_029",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Mau dibuatkan jadwal olahraga ringan?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_030",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Mau tips diet sesuai kondisimu?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_031",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Bagaimana stres / beban pikiran hari ini?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_032",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Apakah obat terasa efek samping?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_033",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Sudah ukur tekanan darah / gula hari ini?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_034",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Ada janji dokter yang perlu diingat?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_checkin_035",
+    "intent": "ask.checkin",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica nanya",
+    "body": "Mau Sehatica ringkas progress minggu ini?",
+    "tone": "curious",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_001",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Kami kangen",
+    "body": "Sehatica belum dengar kabarmu. Ada yang bisa dibantu?",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_002",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Masih di sini",
+    "body": "Kapan saja siap saat kamu butuh.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_003",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Lanjut lagi?",
+    "body": "Jadwal kesehatanmu menunggu di Sehatica.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_004",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Satu menit saja",
+    "body": "Buka Sehatica sebentar untuk update kondisi.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_005",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Jangan hilang",
+    "body": "Konsistensi kecil lebih baik daripada berhenti.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_006",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Halo lagi",
+    "body": "{{name}}, yuk cek progress kesehatanmu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_007",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica menunggu",
+    "body": "Ada pertanyaan tertunda untukmu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_008",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Kembali ke ritme",
+    "body": "Mulai dari satu centang jadwal hari ini.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_009",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pengingat lembut",
+    "body": "Sudah beberapa hari. Mau check-in singkat?",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_010",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "WA atau app",
+    "body": "Balas di sini atau buka Sehatica — sama saja.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_011",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Streak putus?",
+    "body": "Tidak masalah. Mulai lagi dari sekarang.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_012",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Kami jaga datamu",
+    "body": "Rekam medis tetap aman. Tinggal lanjut chat.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_013",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore yang tenang",
+    "body": "Waktu bagus untuk update singkat ke Sehatica.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_014",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam tenang",
+    "body": "Sebelum tidur, kabari Sehatica kabarmu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_015",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi baru",
+    "body": "Mulai hari dengan satu pertanyaan sehat.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_016",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Sehatica punya pertanyaan singkat untukmu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_017",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Ada follow-up kesehatan yang tertunda.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_018",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Balas kapan saja — Sehatica tidak menghakimi.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_019",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Satu balasan membantu saran jadi lebih akurat.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_020",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Sehatica siap saat kamu siap.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_021",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Jadwal dan Sehatica menunggu di app.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_022",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Kalau sibuk, balas nanti juga boleh.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_023",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Pengingat: kesehatan butuh ritme, bukan sempurna.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_024",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Kamu tidak sendirian — Sehatica dampingi.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "ask_reengage_025",
+    "intent": "ask.reengage",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica mengingatmu",
+    "body": "Yuk lanjut perjalanan sehatmu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_001",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Lengkapi rekam",
+    "body": "Upload hasil kunjungan biar Sehatica lebih akurat.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_002",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Rekam medis",
+    "body": "Belum ada catatan baru. Mau tambah sekarang?",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_003",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Foto lab?",
+    "body": "Bisa OCR dokumen medis di tab Rekam.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_004",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Catatan singkat",
+    "body": "Tulis keluhan hari ini di rekam medis.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_005",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Agar saran pas",
+    "body": "Sehatica butuh data terbaru dari rekammu.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_006",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Setelah kontrol",
+    "body": "Simpan hasil dokter ke Sehatica.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_007",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Jangan hilang",
+    "body": "Simpan ringkasan konsultasi sekarang.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_008",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Satu upload",
+    "body": "Foto resep / hasil lab cukup untuk mulai.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_009",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Update data",
+    "body": "Rekam medis membantu verifikasi dokter.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_records_010",
+    "intent": "nudge.records",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica sarankan",
+    "body": "Tambah catatan kondisi minggu ini.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_001",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Partner dokter",
+    "body": "Scan QR dokter untuk menambah partner.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_002",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Verifikasi",
+    "body": "Ada saran Sehatica yang bisa diminta verifikasi dokter.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_003",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Dokter online",
+    "body": "Partner doktermu tersedia untuk konsultasi.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_004",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Menunggu dokter",
+    "body": "Permintaan verifikasi masih diproses.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_005",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Hasil verifikasi",
+    "body": "Dokter sudah meninjau saran Sehatica.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_006",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Tambah partner",
+    "body": "Hubungkan dokter lewat QR di tab Dokter.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_007",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Aman dulu",
+    "body": "Untuk saran kritis, minta verifikasi dokter ya.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_008",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Update partner",
+    "body": "Cek status dokter partner di Sehatica.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_009",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "Konsultasi",
+    "body": "Dokter partner siap dihubungi.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_doctor_010",
+    "intent": "nudge.doctor",
+    "channels": [
+      "push",
+      "system",
+      "chat"
+    ],
+    "title": "QR siap",
+    "body": "Minta kode QR ke dokter klinikmu.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_001",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Mantap!",
+    "body": "Jadwal hari ini 100% selesai.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_002",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Bagus!",
+    "body": "Obat ditandai tepat waktu. Sehatica bangga.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_003",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Progres bagus",
+    "body": "{{done}} aktivitas selesai hari ini.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_004",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Konsisten",
+    "body": "Kamu menjaga ritme — itu yang penting.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_005",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Streak hidup",
+    "body": "Hari berturut terisi. Lanjut besok!",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_006",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Satu kemenangan",
+    "body": "Centang kecil, dampak besar.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_007",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica apresiasi",
+    "body": "Terima kasih sudah update kondisimu.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_008",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Rekam tersimpan",
+    "body": "Catatan medis berhasil ditambahkan.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_009",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Partner terhubung",
+    "body": "Dokter berhasil ditambahkan.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "celeb_010",
+    "intent": "celebration",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Balasan diterima",
+    "body": "Sehatica sudah membaca pesanmu.",
+    "tone": "positive",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_001",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Selamat pagi{{name_suffix}}. Badan terasa fit?",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_002",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Pagi! Cek jadwal obat / makan pagi yuk.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_003",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Mulai hari dengan satu centang sehat.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_004",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Sehatica ucapkan pagi. Ada keluhan semalam?",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_005",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Pagi adalah waktu bagus untuk minum air.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_006",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Lihat jadwal pagi sebelum aktivitas padat.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_007",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Satu pertanyaan pagi: tidurmu cukup?",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_008",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Sehatica siap dampingi harimu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_009",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Jangan skip sarapan / obat pagi ya.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_morning_010",
+    "intent": "time.morning",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Pagi dari Sehatica",
+    "body": "Kabarin Sehatica kalau kurang fit pagi ini.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_001",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Siang. Sudah minum air cukup?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_002",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Sehatica cek: jadwal siang sudah ditandai?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_003",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Istirahat sebentar dan update kondisi?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_004",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Siang produktif — jangan lupa obat siang.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_005",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Bagaimana energimu sore menjelang?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_006",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Ada gejala yang muncul siang ini?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_007",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Cek sisa jadwal sebelum sore.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_008",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Sehatica siap kalau mau tanya cepat.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_009",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Makan siang sesuai rencana?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_afternoon_010",
+    "intent": "time.afternoon",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Siang dari Sehatica",
+    "body": "Satu napas, satu teguk air.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_001",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Sore. Saatnya review jadwal hari ini.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_002",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Bagaimana harimu secara keseluruhan?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_003",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Obat malam jangan sampai lupa.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_004",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Sehatica nanya: ada yang perlu dicatat?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_005",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Sisa jadwal: selesaikan sebelum malam.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_006",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Update singkat biar saran malam lebih pas.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_007",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Sudah olahraga / jalan sore?",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_008",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Minum air terakhir sebelum malam.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_009",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Cerita ke Sehatica kalau ada keluhan sore.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_evening_010",
+    "intent": "time.evening",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sore dari Sehatica",
+    "body": "Sore tenang — check-in 30 detik saja.",
+    "tone": "gentle",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_001",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Menjelang tidur: sudah minum obat malam?",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_002",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Tidur cukup bantu pemulihan. Siap istirahat?",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_003",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Sehatica: catat keluhan sebelum tidur?",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_004",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Matikan notifikasi lain, tapi jangan skip obat malam.",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_005",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Satu checklist malam: air, obat, istirahat.",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_006",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Kalau insomnia / nyeri malam, kabari Sehatica.",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_007",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Selamat beristirahat. Sehatica jaga ringkasanmu.",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_008",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Malam ini, tubuhmu butuh istirahat.",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_009",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Review singkat hari ini sebelum tidur?",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "tod_night_010",
+    "intent": "time.night",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Malam dari Sehatica",
+    "body": "Jadwal besok sudah siap — tidur dulu.",
+    "tone": "calm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_001",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Sehatica: sudah minum obat?",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_002",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Cek jadwal yuk 👆",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_003",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Kabarin kondisi hari ini dong",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_004",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Minum air dulu ya",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_005",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Ada gejala baru?",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_006",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Tandai jadwal di Sehatica",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_007",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Sehatica tunggu balasan singkat",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_008",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Obat malam jangan lupa",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_009",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Upload lab kalau sudah ada",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_010",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Scan QR dokter di app",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_011",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Baik / kurang fit? Balas satu kata",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_012",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Progress jadwal: buka app sebentar",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_013",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Follow-up dari Sehatica 💬",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_014",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Pertanyaan cepat dari Sehatica",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_015",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Sinkron WA ↔ Sehatica aktif",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_016",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Butuh verifikasi dokter?",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_017",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Jadwal olahraga hari ini?",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_018",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Makan sesuai jadwal?",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_019",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Sehatica di sini 24/7 (bot)",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "wa_short_020",
+    "intent": "channel.whatsapp_short",
+    "channels": [
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Balas kapan saja",
+    "tone": "concise",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_001",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Cek interaksi obat saya",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_002",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Buat jadwal olahraga",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_003",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Tips diet untuk kondisi saya",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_004",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Analisis rekam medis saya",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_005",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Gejala yang perlu diwaspadai",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_006",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Ringkas hasil lab terakhir",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_007",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Apa arti diagnosis saya?",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_008",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Jadwal minum obat ideal",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_009",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Tips tidur lebih baik",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_010",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Cek kepatuhan jadwal minggu ini",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_011",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Kapan harus ke dokter?",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_012",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Saran olahraga ringan di rumah",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_013",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Makanan yang sebaiknya dihindari",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_014",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Cara catat gejala harian",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_015",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Persiapan sebelum kontrol dokter",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_016",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Apa itu efek samping obat saya?",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_017",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Bantu buat checklist harian",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_018",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Tips mengelola stres",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_019",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Ingatkan saya minum air",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_020",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Review progress kesehatan bulan ini",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_021",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Apakah olahraga ini aman untuk saya?",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_022",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Bantu interpretasi tekanan darah",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_023",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Saran menu makan pagi sehat",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_024",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Apa yang harus dilakukan jika pusing?",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_suggest_025",
+    "intent": "chat.suggestion",
+    "channels": [
+      "chat"
+    ],
+    "title": "",
+    "body": "Buat pengingat obat malam",
+    "tone": "neutral",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_001",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Halo! Saya Sehatica. Asisten kesehatan AI Anda.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_002",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Silakan pilih topik di bawah atau ketik pertanyaan.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_003",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Saya bisa bantu pahami rekam medis, jadwal, dan gejala.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_004",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Saran saya bisa diminta verifikasi dokter partner.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_005",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Data kesehatanmu dipakai untuk personalisasi — kamu kendalikan.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_006",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Mau mulai dari jadwal, rekam, atau keluhan hari ini?",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_007",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Tanya apa saja — mulai dari yang sederhana juga boleh.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_008",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Jika mendesak / darurat, hubungi layanan medis setempat.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_009",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Sehatica bukan pengganti dokter, tapi teman pantau harian.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "chat_system_010",
+    "intent": "chat.system",
+    "channels": [
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica",
+    "body": "Kamu bisa lanjut di WhatsApp dengan nomor yang sama terhubung.",
+    "tone": "informative",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_001",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Terlewat",
+    "body": "{{label}} belum ditandai. Masih sempat sekarang.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_002",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Lewat jam",
+    "body": "Jadwal {{time}} terlewat — selesaikan jika masih relevan.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_003",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Perlu perhatian",
+    "body": "Beberapa item jadwal tertunda hari ini.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_004",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Follow-up",
+    "body": "Kemarin ada jadwal belum selesai. Lanjut hari ini?",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_005",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Jangan menumpuk",
+    "body": "Selesaikan satu yang tertunda dulu: {{label}}.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_006",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Sehatica khawatir kecil",
+    "body": "Sudah lama tidak ada update kepatuhan jadwal.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_007",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Cek sekarang",
+    "body": "Ada pengingat penting yang belum direspons.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_008",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Agar akurat",
+    "body": "Tanpa konfirmasi, Sehatica sulit menyesuaikan saran.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_009",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Prioritas",
+    "body": "Fokus ke {{label}} dulu hari ini.",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "nudge_missed_010",
+    "intent": "nudge.missed",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Masih relevan?",
+    "body": "Apakah {{label}} masih perlu dilakukan?",
+    "tone": "soft_urgent",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_001",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Minum air sebelum kopi membantu hidrasi pagi.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_002",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Jalan kaki 10 menit setelah makan bisa bantu metabolisme.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_003",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Catat gejala di jam yang sama tiap hari biar polanya kelihatan.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_004",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Obat lebih mudah diingat jika dipasangkan ke kebiasaan (mis. setelah sikat gigi).",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_005",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Tidur teratur sering lebih berdampak daripada “sempurna sekali”.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_006",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Kalau pusing saat berdiri, duduk dulu lalu kabari Sehatica.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_007",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Foto label obat membantu Sehatica mengingatkan dosis.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_008",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Satu pertanyaan ke dokter di kontrol lebih baik daripada sepuluh yang terlupa.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_009",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Streak kecil mengalahkan motivasi besar yang putus.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_010",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Kalau ragu saran AI, minta verifikasi dokter di app.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_011",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Kurangi scroll malam — tidur lebih dalam bantu pemulihan.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_012",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Garam & gula: catat jika dokter meminta pantauan.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_013",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Olahraga bukan harus gym — naik tangga juga dihitung.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_014",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Bawa botol minum kecil di tas mengurangi lupa hidrasi.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "insight_tip_015",
+    "intent": "insight.tip",
+    "channels": [
+      "chat",
+      "whatsapp",
+      "push"
+    ],
+    "title": "Tips Sehatica",
+    "body": "Update alergi/kondisi di profil biar saran lebih aman.",
+    "tone": "helpful",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_001",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, jadwalmu menunggu sebentar saja.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_002",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, Sehatica punya pertanyaan singkat.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_003",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, sudah minum obat hari ini?",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_004",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, kabari kondisi biar kami bisa bantu.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_005",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, progress minggu ini bisa kita review.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_006",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, jangan lupa hidrasi.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_007",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, partner dokter bisa ditambah lewat QR.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_008",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, rekam medis terbaru bantu akurasi saran.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_009",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, satu centang jadwal sekarang juga boleh.",
+    "tone": "warm",
+    "locale": "id"
+  },
+  {
+    "arm_id": "pers_name_010",
+    "intent": "personal.name",
+    "channels": [
+      "push",
+      "chat",
+      "whatsapp"
+    ],
+    "title": "Hai {{name}}",
+    "body": "{{name}}, Sehatica siap di WA maupun app.",
+    "tone": "warm",
+    "locale": "id"
+  }
+]

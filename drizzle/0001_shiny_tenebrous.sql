@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX "doctors_user_unique" ON "doctors" USING btree ("user_id");

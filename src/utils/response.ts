@@ -7,7 +7,7 @@ export function successResponse(c: Context, data: unknown, status: 200 | 201 = 2
 export function errorResponse(
   c: Context,
   message: string,
-  status: 400 | 401 | 403 | 404 | 409 | 413 | 422 | 500 = 400
+  status: 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 = 400
 ) {
   return c.json({ success: false, error: message }, status);
 }

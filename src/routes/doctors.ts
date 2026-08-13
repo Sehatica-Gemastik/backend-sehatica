@@ -1,163 +1,188 @@
 import { Hono } from 'hono';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db';
-import { doctors, users } from '../db/schema';
-import { eq, desc } from 'drizzle-orm';
-import { authMiddleware, doctorMiddleware } from '../middlewares/auth';
+import { doctors, userDoctors, recordTransfers } from '../db/schema';
+import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
-import { generateAvatarInitials } from '../utils/password';
 
 const doctorsRoute = new Hono();
 
 doctorsRoute.use('*', authMiddleware);
 
-// GET /doctors/me — current doctor's detailed profile
-doctorsRoute.get('/me', doctorMiddleware, async (c) => {
+function formatDoctor(d: any) {
+  return {
+    id: d.id,
+    name: d.user?.name ?? 'Dokter',
+    email: d.user?.email,
+    specialty: d.specialty,
+    isAvailable: d.isAvailable,
+    avatarInitials: d.user?.avatarInitials ?? 'DR',
+    qrPayload: `sehatica:doctor:${d.id}`,
+  };
+}
+
+/** Parse QR / kode: sehatica:doctor:12 | sehatica://doctor/12 | plain number */
+function parseDoctorCode(raw: string): number | null {
+  const value = raw.trim();
+  if (!value) return null;
+
+  const patterns = [
+    /^sehatica:doctor:(\d+)$/i,
+    /^sehatica:\/\/doctor\/(\d+)$/i,
+    /^mobilesehatica:\/\/doctor\/(\d+)$/i,
+    /^DOC-(\d+)$/i,
+    /^(\d+)$/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern);
+    if (match) {
+      const id = parseInt(match[1], 10);
+      return Number.isFinite(id) ? id : null;
+    }
+  }
+
   try {
-    const userId = c.get('userId');
+    const json = JSON.parse(value);
+    if (json?.type === 'doctor' && json?.id) return parseInt(String(json.id), 10);
+    if (json?.sehatica === 'doctor' && json?.id) return parseInt(String(json.id), 10);
+  } catch {
+    // not json
+  }
+
+  return null;
+}
+
+// GET /doctors/partners — linked partners only
+doctorsRoute.get('/partners', async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    const links = await db.query.userDoctors.findMany({
+      where: eq(userDoctors.userId, userId),
+      with: { doctor: { with: { user: true } } },
+      orderBy: [desc(userDoctors.createdAt)],
+    });
+
+    return successResponse(
+      c,
+      links
+        .filter((l: any) => l.doctor)
+        .map((l: any) => formatDoctor(l.doctor))
+    );
+  } catch {
+    return errorResponse(c, 'Gagal mengambil dokter partner', 500);
+  }
+});
+
+// POST /doctors/partners — add partner via QR / kode
+doctorsRoute.post('/partners', async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    const body = await c.req.json();
+    const code = String(body.code ?? body.qr ?? body.doctorId ?? '').trim();
+
+    if (!code) {
+      return errorResponse(c, 'Kode QR dokter wajib diisi');
+    }
+
+    const doctorId = parseDoctorCode(code);
+    if (!doctorId) {
+      return errorResponse(c, 'Kode QR tidak valid. Format: sehatica:doctor:{id}');
+    }
+
     const doctor = await db.query.doctors.findFirst({
-      where: eq(doctors.userId, userId),
+      where: eq(doctors.id, doctorId),
       with: { user: true },
     });
 
-    if (!doctor) return errorResponse(c, 'Profil dokter tidak ditemukan', 404);
+    if (!doctor) {
+      return errorResponse(c, 'Dokter tidak ditemukan', 404);
+    }
 
-    return successResponse(c, {
-      id: doctor.id,
-      userId: doctor.userId,
-      name: doctor.user?.name ?? 'Dokter',
-      email: doctor.user?.email ?? '',
-      phone: doctor.user?.phone ?? '',
-      specialty: doctor.specialty,
-      feePerQna: doctor.feePerQna ?? '25000',
-      rating: parseFloat(doctor.rating ?? '5.0'),
-      reviewCount: doctor.reviewCount,
-      verifiedCount: doctor.verifiedCount,
-      isAvailable: doctor.isAvailable,
-      bio: doctor.bio,
-      avatarInitials: doctor.user?.avatarInitials ?? 'DR',
-    });
-  } catch {
-    return errorResponse(c, 'Gagal mengambil profil dokter', 500);
-  }
-});
-
-// PATCH /doctors/me — update current doctor's profile, feePerQna & availability
-doctorsRoute.patch('/me', doctorMiddleware, async (c) => {
-  try {
-    const userId = c.get('userId');
-    const doctor = await db.query.doctors.findFirst({ where: eq(doctors.userId, userId) });
-    if (!doctor) return errorResponse(c, 'Profil dokter tidak ditemukan', 404);
-
-    const body = await c.req.json().catch(() => null);
-    if (!body || typeof body !== 'object') return errorResponse(c, 'Body request tidak valid');
-
-    const { name, phone, specialty, feePerQna, bio, isAvailable } = body;
-
-    await db.transaction(async (tx) => {
-      const userUpdates: Record<string, unknown> = { updatedAt: new Date() };
-      if (typeof name === 'string' && name.trim()) {
-        userUpdates.name = name.trim();
-        userUpdates.avatarInitials = generateAvatarInitials(name.trim());
-      }
-      if (phone !== undefined) userUpdates.phone = typeof phone === 'string' ? phone.trim() : null;
-
-      if (Object.keys(userUpdates).length > 1) {
-        await tx.update(users).set(userUpdates).where(eq(users.id, userId));
-      }
-
-      const doctorUpdates: Record<string, unknown> = {};
-      if (typeof specialty === 'string' && specialty.trim()) doctorUpdates.specialty = specialty.trim();
-      if (feePerQna !== undefined) {
-        const parsedFee = parseFloat(String(feePerQna));
-        doctorUpdates.feePerQna = isNaN(parsedFee) || parsedFee < 0 ? '25000' : parsedFee.toString();
-      }
-      if (bio !== undefined) doctorUpdates.bio = typeof bio === 'string' ? bio.trim() : null;
-      if (typeof isAvailable === 'boolean') doctorUpdates.isAvailable = isAvailable;
-
-      if (Object.keys(doctorUpdates).length > 0) {
-        await tx.update(doctors).set(doctorUpdates).where(eq(doctors.id, doctor.id));
-      }
+    const existing = await db.query.userDoctors.findFirst({
+      where: and(eq(userDoctors.userId, userId), eq(userDoctors.doctorId, doctorId)),
     });
 
-    const updatedDoctor = await db.query.doctors.findFirst({
-      where: eq(doctors.id, doctor.id),
-      with: { user: true },
-    });
+    if (existing) {
+      return successResponse(c, {
+        alreadyLinked: true,
+        doctor: formatDoctor(doctor),
+      });
+    }
 
-    return successResponse(c, {
-      id: updatedDoctor!.id,
-      name: updatedDoctor!.user?.name ?? 'Dokter',
-      email: updatedDoctor!.user?.email ?? '',
-      phone: updatedDoctor!.user?.phone ?? '',
-      specialty: updatedDoctor!.specialty,
-      feePerQna: updatedDoctor!.feePerQna ?? '25000',
-      rating: parseFloat(updatedDoctor!.rating ?? '5.0'),
-      reviewCount: updatedDoctor!.reviewCount,
-      verifiedCount: updatedDoctor!.verifiedCount,
-      isAvailable: updatedDoctor!.isAvailable,
-      bio: updatedDoctor!.bio,
-      avatarInitials: updatedDoctor!.user?.avatarInitials ?? 'DR',
-    });
+    await db.insert(userDoctors).values({ userId, doctorId });
+
+    return successResponse(
+      c,
+      {
+        alreadyLinked: false,
+        doctor: formatDoctor(doctor),
+      },
+      201
+    );
   } catch (err) {
-    console.error('Update doctor profile error:', err);
-    return errorResponse(c, 'Gagal memperbarui profil dokter', 500);
+    console.error('Add partner error:', err);
+    return errorResponse(c, 'Gagal menambahkan dokter partner', 500);
   }
 });
 
-// GET /doctors/patients — list non-doctor users for voluntary review selection
-doctorsRoute.get('/patients', doctorMiddleware, async (c) => {
+// POST /doctors/partners/:doctorId/record-transfers — log Bluetooth file transfer
+doctorsRoute.post('/partners/:doctorId/record-transfers', async (c) => {
   try {
-    const allUsers = await db.query.users.findMany({
-      where: eq(users.role, 'user'),
-      orderBy: [desc(users.createdAt)],
+    const userId = c.get('userId') as number;
+    const doctorId = parseInt(c.req.param('doctorId'), 10);
+    if (!Number.isFinite(doctorId)) {
+      return errorResponse(c, 'ID dokter tidak valid');
+    }
+
+    const link = await db.query.userDoctors.findFirst({
+      where: and(eq(userDoctors.userId, userId), eq(userDoctors.doctorId, doctorId)),
     });
+    if (!link) {
+      return errorResponse(c, 'Dokter partner tidak ditemukan', 404);
+    }
 
-    const formatted = allUsers.map((u) => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      phone: u.phone,
-      avatarInitials: u.avatarInitials ?? 'PA',
-    }));
+    const body = await c.req.json();
+    const recordTitle = String(body.recordTitle ?? body.title ?? 'Dokumen PDF').trim();
+    if (!recordTitle) {
+      return errorResponse(c, 'Judul dokumen wajib diisi');
+    }
 
-    return successResponse(c, formatted);
-  } catch {
-    return errorResponse(c, 'Gagal mengambil daftar pasien', 500);
+    const [row] = await db
+      .insert(recordTransfers)
+      .values({
+        userId,
+        doctorId,
+        localRecordId: Number.isFinite(Number(body.recordId)) ? Number(body.recordId) : null,
+        recordTitle,
+        fileName: body.fileName ? String(body.fileName) : null,
+        byteSize: Math.max(0, Number(body.byteSize ?? 0)),
+        transferMethod: 'bluetooth',
+        status: 'completed',
+      })
+      .returning();
+
+    return successResponse(c, {
+      id: row.id,
+      doctorId: row.doctorId,
+      recordTitle: row.recordTitle,
+      status: row.status,
+      createdAt: row.createdAt.toISOString(),
+    }, 201);
+  } catch (err) {
+    console.error('Record transfer log error:', err);
+    return errorResponse(c, 'Gagal mencatat transfer dokumen', 500);
   }
 });
 
-// GET /doctors — list all available doctors
-doctorsRoute.get('/', async (c) => {
-  try {
-    const allDoctors = await db.query.doctors.findMany({
-      with: { user: true },
-      orderBy: [desc(doctors.verifiedCount)],
-    });
-
-    const formatted = allDoctors.map((d: any) => ({
-      id: d.id,
-      name: d.user?.name ?? 'Dokter',
-      specialty: d.specialty,
-      feePerQna: d.feePerQna ?? '25000',
-      rating: parseFloat(d.rating ?? '5.0'),
-      reviewCount: d.reviewCount,
-      verifiedCount: d.verifiedCount,
-      isAvailable: d.isAvailable,
-      bio: d.bio,
-      avatarInitials: d.user?.avatarInitials ?? 'DR',
-      colorScheme: 'blue',
-    }));
-
-    return successResponse(c, formatted);
-  } catch {
-    return errorResponse(c, 'Gagal mengambil daftar dokter', 500);
-  }
-});
-
-// GET /doctors/:id
+// GET /doctors/:id — must stay after /partners
 doctorsRoute.get('/:id', async (c) => {
   try {
     const id = parseInt(c.req.param('id'));
+    if (!Number.isFinite(id)) {
+      return errorResponse(c, 'ID dokter tidak valid');
+    }
+
     const doctor = await db.query.doctors.findFirst({
       where: eq(doctors.id, id),
       with: { user: true },
@@ -165,18 +190,7 @@ doctorsRoute.get('/:id', async (c) => {
 
     if (!doctor) return errorResponse(c, 'Dokter tidak ditemukan', 404);
 
-    return successResponse(c, {
-      id: doctor.id,
-      name: (doctor as any).user?.name ?? 'Dokter',
-      specialty: doctor.specialty,
-      feePerQna: doctor.feePerQna ?? '25000',
-      rating: parseFloat(doctor.rating ?? '5.0'),
-      reviewCount: doctor.reviewCount,
-      verifiedCount: doctor.verifiedCount,
-      isAvailable: doctor.isAvailable,
-      bio: doctor.bio,
-      avatarInitials: (doctor as any).user?.avatarInitials ?? 'DR',
-    });
+    return successResponse(c, formatDoctor(doctor));
   } catch {
     return errorResponse(c, 'Terjadi kesalahan server', 500);
   }

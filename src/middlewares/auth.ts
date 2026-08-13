@@ -1,5 +1,5 @@
 import { MiddlewareHandler } from 'hono';
-import { verifyAccessToken } from '../utils/jwt';
+import { verifyToken } from '../utils/jwt';
 import { db } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
@@ -8,10 +8,6 @@ export interface AuthVariables {
   userId: number;
   userEmail: string;
   userRole: string;
-}
-
-declare module 'hono' {
-  interface ContextVariableMap extends AuthVariables {}
 }
 
 export const authMiddleware: MiddlewareHandler = async (c, next) => {
@@ -24,7 +20,7 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
   const token = authorization.slice(7);
 
   try {
-    const payload = await verifyAccessToken(token);
+    const payload = await verifyToken(token);
 
     // Verify user still exists in DB
     const user = await db.query.users.findFirst({
@@ -35,9 +31,9 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
       return c.json({ success: false, error: 'Unauthorized: User not found' }, 401);
     }
 
-    c.set('userId', user.id);
-    c.set('userEmail', user.email);
-    c.set('userRole', user.role);
+    c.set('userId', payload.sub);
+    c.set('userEmail', payload.email);
+    c.set('userRole', payload.role);
 
     await next();
   } catch (err) {
