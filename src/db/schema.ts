@@ -51,6 +51,12 @@ export const users = pgTable('users', {
   conditions: text('conditions'),
   isPro: boolean('is_pro').default(false).notNull(),
   refreshToken: text('refresh_token'),
+  age: integer('age'),
+  sex: integer('sex'),
+  raceEthnicity: integer('race_ethnicity'),
+  education: integer('education'),
+  incomePovertyRatio: numeric('income_poverty_ratio', { precision: 4, scale: 2 }),
+  identityCompletedAt: timestamp('identity_completed_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

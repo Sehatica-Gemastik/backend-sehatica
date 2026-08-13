@@ -203,10 +203,25 @@ function hasClinicData(input: PtmInputFeatures): boolean {
   );
 }
 
+const NUTRITION_KEYS = new Set([
+  'calories_day1', 'protein_g_day1', 'carbohydrate_g_day1', 'sugar_g_day1',
+  'total_fat_g_day1', 'saturated_fat_g_day1', 'sodium_mg_day1',
+  'fiber_g_day1', 'cholesterol_mg_day1', 'alcohol_g_day1',
+]);
+
 function toRawMap(input: PtmInputFeatures): Record<string, number | null> {
   const map: Record<string, number | null> = {};
   for (const [key, value] of Object.entries(input)) {
-    map[key] = value === undefined ? null : (value as number | null);
+    if (value === undefined || value === null) {
+      map[key] = null;
+      continue;
+    }
+    const n = value as number;
+    if (NUTRITION_KEYS.has(key) && n < 0) {
+      map[key] = null;
+      continue;
+    }
+    map[key] = n;
   }
   return map;
 }

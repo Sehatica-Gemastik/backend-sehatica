@@ -6,6 +6,11 @@ import { hashPassword, verifyPassword, generateAvatarInitials } from '../utils/p
 import { signAccessToken, signRefreshToken, verifyToken } from '../utils/jwt';
 import { successResponse, errorResponse } from '../utils/response';
 import { authMiddleware } from '../middlewares/auth';
+import {
+  formatUserResponse,
+  isUserIdentityComplete,
+  parseIdentityPatch,
+} from '../utils/user-profile';
 
 const auth = new Hono();
 
@@ -52,14 +57,7 @@ auth.post('/register', async (c) => {
     await db.update(users).set({ refreshToken: realRefreshToken }).where(eq(users.id, newUser.id));
 
     return successResponse(c, {
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        avatarInitials: newUser.avatarInitials,
-        isPro: newUser.isPro,
-      },
+      user: formatUserResponse(newUser),
       accessToken,
       refreshToken: realRefreshToken,
     }, 201);
@@ -97,16 +95,7 @@ auth.post('/login', async (c) => {
     await db.update(users).set({ refreshToken, updatedAt: new Date() }).where(eq(users.id, user.id));
 
     return successResponse(c, {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatarInitials: user.avatarInitials,
-        isPro: user.isPro,
-        conditions: user.conditions,
-        phone: user.phone,
-      },
+      user: formatUserResponse(user),
       accessToken,
       refreshToken,
     });
@@ -153,20 +142,7 @@ auth.get('/me', authMiddleware, async (c) => {
 
     if (!user) return errorResponse(c, 'User tidak ditemukan', 404);
 
-    return successResponse(c, {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatarInitials: user.avatarInitials,
-      isPro: user.isPro,
-      phone: user.phone,
-      dateOfBirth: user.dateOfBirth,
-      bloodType: user.bloodType,
-      allergies: user.allergies,
-      conditions: user.conditions,
-      createdAt: user.createdAt,
-    });
+    return successResponse(c, formatUserResponse(user));
   } catch {
     return errorResponse(c, 'Terjadi kesalahan server', 500);
   }
@@ -187,8 +163,25 @@ auth.patch('/profile', authMiddleware, async (c) => {
     if (allergies !== undefined) updates.allergies = allergies;
     if (conditions !== undefined) updates.conditions = conditions;
 
+    const identityPatch = parseIdentityPatch(body);
+    if (identityPatch.error) {
+      return errorResponse(c, identityPatch.error);
+    }
+    Object.assign(updates, identityPatch.updates);
+
     const [updated] = await db.update(users).set(updates).where(eq(users.id, userId)).returning();
-    return successResponse(c, { id: updated.id, name: updated.name, email: updated.email });
+    if (!updated) return errorResponse(c, 'User tidak ditemukan', 404);
+
+    if (isUserIdentityComplete(updated) && !updated.identityCompletedAt) {
+      const [withStamp] = await db
+        .update(users)
+        .set({ identityCompletedAt: new Date(), updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      return successResponse(c, formatUserResponse(withStamp ?? updated));
+    }
+
+    return successResponse(c, formatUserResponse(updated));
   } catch {
     return errorResponse(c, 'Terjadi kesalahan server', 500);
   }

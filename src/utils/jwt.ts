@@ -1,6 +1,16 @@
 import { sign, verify } from 'hono/jwt';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET?.trim();
+  if (!secret) {
+    throw new Error(
+      'JWT_SECRET belum diset. Salin .env.example ke .env dan isi JWT_SECRET (min. 32 karakter acak).'
+    );
+  }
+  return secret;
+}
+
+const JWT_SECRET = getJwtSecret();
 const JWT_EXPIRES_IN = 7 * 24 * 60 * 60; // 7 days in seconds
 const JWT_REFRESH_EXPIRES_IN = 30 * 24 * 60 * 60; // 30 days
 
