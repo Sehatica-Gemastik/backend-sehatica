@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db';
-import { doctors, userDoctors } from '../db/schema';
+import { doctors, userDoctors, recordTransfers } from '../db/schema';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 
@@ -123,6 +123,55 @@ doctorsRoute.post('/partners', async (c) => {
   } catch (err) {
     console.error('Add partner error:', err);
     return errorResponse(c, 'Gagal menambahkan dokter partner', 500);
+  }
+});
+
+// POST /doctors/partners/:doctorId/record-transfers — log Bluetooth file transfer
+doctorsRoute.post('/partners/:doctorId/record-transfers', async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    const doctorId = parseInt(c.req.param('doctorId'), 10);
+    if (!Number.isFinite(doctorId)) {
+      return errorResponse(c, 'ID dokter tidak valid');
+    }
+
+    const link = await db.query.userDoctors.findFirst({
+      where: and(eq(userDoctors.userId, userId), eq(userDoctors.doctorId, doctorId)),
+    });
+    if (!link) {
+      return errorResponse(c, 'Dokter partner tidak ditemukan', 404);
+    }
+
+    const body = await c.req.json();
+    const recordTitle = String(body.recordTitle ?? body.title ?? 'Dokumen PDF').trim();
+    if (!recordTitle) {
+      return errorResponse(c, 'Judul dokumen wajib diisi');
+    }
+
+    const [row] = await db
+      .insert(recordTransfers)
+      .values({
+        userId,
+        doctorId,
+        localRecordId: Number.isFinite(Number(body.recordId)) ? Number(body.recordId) : null,
+        recordTitle,
+        fileName: body.fileName ? String(body.fileName) : null,
+        byteSize: Math.max(0, Number(body.byteSize ?? 0)),
+        transferMethod: 'bluetooth',
+        status: 'completed',
+      })
+      .returning();
+
+    return successResponse(c, {
+      id: row.id,
+      doctorId: row.doctorId,
+      recordTitle: row.recordTitle,
+      status: row.status,
+      createdAt: row.createdAt.toISOString(),
+    }, 201);
+  } catch (err) {
+    console.error('Record transfer log error:', err);
+    return errorResponse(c, 'Gagal mencatat transfer dokumen', 500);
   }
 });
 

@@ -78,6 +78,24 @@ export const userDoctors = pgTable('user_doctors', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+/** Log of medical record transfers from patient to partner doctor */
+export const recordTransfers = pgTable('record_transfers', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  doctorId: integer('doctor_id')
+    .references(() => doctors.id, { onDelete: 'cascade' })
+    .notNull(),
+  localRecordId: integer('local_record_id'),
+  recordTitle: varchar('record_title', { length: 255 }).notNull(),
+  fileName: varchar('file_name', { length: 255 }),
+  byteSize: integer('byte_size').default(0).notNull(),
+  transferMethod: varchar('transfer_method', { length: 32 }).default('bluetooth').notNull(),
+  status: varchar('status', { length: 32 }).default('completed').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // ── Medical Records ────────────────────────────────────────────────────────
 export const medicalRecords = pgTable('medical_records', {
   id: serial('id').primaryKey(),
@@ -281,3 +299,4 @@ export type DailyInsight = typeof dailyInsights.$inferSelect;
 export type NotificationArm = typeof notificationArms.$inferSelect;
 export type RdsaAsk = typeof rdsaAsks.$inferSelect;
 export type DoctorChatMessage = typeof doctorChatMessages.$inferSelect;
+export type RecordTransfer = typeof recordTransfers.$inferSelect;

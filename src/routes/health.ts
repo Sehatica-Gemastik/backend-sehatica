@@ -8,6 +8,7 @@ import {
   upsertDailyCompliance,
   type DailySyncPayload,
 } from '../services/compliance/daily-compliance';
+import { predictPtmRisk, type PtmInputFeatures } from '../services/ptm/inference';
 
 const health = new Hono();
 
@@ -58,6 +59,18 @@ health.post('/daily-sync', async (c) => {
   } catch (err) {
     console.error('Daily sync error:', err);
     return errorResponse(c, 'Gagal sinkronisasi data harian', 500);
+  }
+});
+
+/** POST /health/ptm-risk — predict PTM risk from lifestyle + clinical features */
+health.post('/ptm-risk', async (c) => {
+  try {
+    const body = await c.req.json() as Partial<PtmInputFeatures>;
+    const result = predictPtmRisk(body);
+    return successResponse(c, result);
+  } catch (err) {
+    console.error('PTM risk error:', err);
+    return errorResponse(c, 'Gagal menghitung risiko PTM', 500);
   }
 });
 
