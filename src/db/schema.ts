@@ -34,7 +34,6 @@ export const askStatusEnum = pgEnum('ask_status', [
   'expired',
   'dismissed',
 ]);
-export const chatMessageRoleEnum = pgEnum('chat_message_role', ['user', 'doctor']);
 export const safetyLevelEnum = pgEnum('safety_level', ['general', 'review', 'urgent']);
 export const reviewScopeEnum = pgEnum('review_scope', ['bubble', 'session', 'history']);
 export const reviewTypeEnum = pgEnum('review_type', ['paid', 'voluntary']);
@@ -246,20 +245,6 @@ export const rdsaAsks = pgTable('rdsa_asks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// ── Doctor chat (patient ↔ partner doctor) ─────────────────────────────────
-export const doctorChatMessages = pgTable('doctor_chat_messages', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
-    .references(() => users.id, { onDelete: 'cascade' })
-    .notNull(),
-  doctorId: integer('doctor_id')
-    .references(() => doctors.id, { onDelete: 'cascade' })
-    .notNull(),
-  role: chatMessageRoleEnum('role').notNull(),
-  content: text('content').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
 // ── Doctor reviews (web portal) ────────────────────────────────────────────
 export const reviews = pgTable('reviews', {
   id: serial('id').primaryKey(),
@@ -327,7 +312,6 @@ export const usersRelations = relations(users, ({ many, one }) => ({
 export const doctorsRelations = relations(doctors, ({ one, many }) => ({
   user: one(users, { fields: [doctors.userId], references: [users.id] }),
   userDoctors: many(userDoctors),
-  chatMessages: many(doctorChatMessages),
   reviews: many(reviews),
 }));
 
@@ -346,11 +330,6 @@ export const schedulesRelations = relations(schedules, ({ one }) => ({
 
 export const rdsaAsksRelations = relations(rdsaAsks, ({ one }) => ({
   user: one(users, { fields: [rdsaAsks.userId], references: [users.id] }),
-}));
-
-export const doctorChatMessagesRelations = relations(doctorChatMessages, ({ one }) => ({
-  user: one(users, { fields: [doctorChatMessages.userId], references: [users.id] }),
-  doctor: one(doctors, { fields: [doctorChatMessages.doctorId], references: [doctors.id] }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one, many }) => ({
@@ -372,7 +351,6 @@ export type Schedule = typeof schedules.$inferSelect;
 export type DailyInsight = typeof dailyInsights.$inferSelect;
 export type NotificationArm = typeof notificationArms.$inferSelect;
 export type RdsaAsk = typeof rdsaAsks.$inferSelect;
-export type DoctorChatMessage = typeof doctorChatMessages.$inferSelect;
 export type RecordTransfer = typeof recordTransfers.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type ReviewItem = typeof reviewItems.$inferSelect;
