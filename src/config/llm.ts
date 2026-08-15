@@ -13,8 +13,6 @@ export const llmConfig = {
   maxOutputTokens: Number(process.env.LLM_MAX_OUTPUT_TOKENS ?? '2048'),
   topP: Number(process.env.LLM_TOP_P ?? '0.95'),
   rateLimitPerMinute: Number(process.env.LLM_RATE_LIMIT_PER_MINUTE ?? '20'),
-  /** Vision uses same Groq multimodal model by default */
-  visionModel: process.env.LLM_VISION_MODEL ?? process.env.LLM_MODEL ?? DEFAULT_MODEL,
 } as const;
 
 export function resolveActiveApiKey(): string {

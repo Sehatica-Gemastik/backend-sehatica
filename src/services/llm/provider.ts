@@ -309,7 +309,7 @@ const groqProvider: LlmProvider = {
       throw new Error('Tidak ada gambar dokumen untuk vision');
     }
 
-    const visionModel = llmConfig.visionModel || defaultModelForProvider();
+    const visionModel = llmConfig.model || defaultModelForProvider();
     const content: Array<Record<string, unknown>> = [{ type: 'text', text: userPrompt }];
     for (const img of images) {
       content.push({

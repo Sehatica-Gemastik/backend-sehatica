@@ -14,6 +14,7 @@ function formatDoctor(d: any) {
     id: d.id,
     name: d.user?.name ?? 'Dokter',
     email: d.user?.email,
+    phone: d.user?.phone ?? null,
     specialty: d.specialty,
     isAvailable: d.isAvailable,
     avatarInitials: d.user?.avatarInitials ?? 'DR',

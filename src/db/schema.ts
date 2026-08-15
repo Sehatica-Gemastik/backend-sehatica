@@ -169,6 +169,8 @@ export const userDailyCompliance = pgTable(
     dailyLogsJson: text('daily_logs_json').default('[]').notNull(),
     scheduleSnapshotJson: text('schedule_snapshot_json').default('[]').notNull(),
     pendingScheduleIntent: boolean('pending_schedule_intent').default(false).notNull(),
+    ptmOverallScore: numeric('ptm_overall_score', { precision: 6, scale: 4 }),
+    ptmScoresJson: text('ptm_scores_json').default('{}').notNull(),
     syncedAt: timestamp('synced_at').defaultNow().notNull(),
   },
   (table) => ({
@@ -178,6 +180,61 @@ export const userDailyCompliance = pgTable(
     ),
   })
 );
+
+/** Patient weekly vitals (mobile weekly-checkin sync) */
+export const userWeeklyCheckins = pgTable('user_weekly_checkins', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull()
+    .unique(),
+  weightKg: numeric('weight_kg', { precision: 6, scale: 2 }).notNull(),
+  heightCm: numeric('height_cm', { precision: 6, scale: 2 }).notNull(),
+  bmi: numeric('bmi', { precision: 5, scale: 2 }).notNull(),
+  waistCm: numeric('waist_cm', { precision: 6, scale: 2 }).notNull(),
+  systolicBp: integer('systolic_bp').notNull(),
+  diastolicBp: integer('diastolic_bp').notNull(),
+  completedAt: timestamp('completed_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+/** Full daily lifestyle questionnaire payload (mobile daily-checkin sync) */
+export const userDailyQuestionnaires = pgTable(
+  'user_daily_questionnaires',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    questionnaireDate: varchar('questionnaire_date', { length: 10 }).notNull(),
+    payloadJson: text('payload_json').notNull(),
+    aiSummary: text('ai_summary'),
+    completedAt: timestamp('completed_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userDateUnique: unique('user_daily_questionnaires_user_date').on(
+      table.userId,
+      table.questionnaireDate,
+    ),
+  }),
+);
+
+/** Doctor-created appointments with linked patients */
+export const doctorAppointments = pgTable('doctor_appointments', {
+  id: serial('id').primaryKey(),
+  doctorId: integer('doctor_id')
+    .references(() => doctors.id, { onDelete: 'cascade' })
+    .notNull(),
+  patientId: integer('patient_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  notes: text('notes').default('').notNull(),
+  startAt: timestamp('start_at').notNull(),
+  endAt: timestamp('end_at').notNull(),
+  status: varchar('status', { length: 32 }).default('scheduled').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
 
 // ── RDSA notification arms ───────────────────────────────────────────────────
 export const notificationArms = pgTable('notification_arms', {
@@ -307,12 +364,16 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   rdsaAsks: many(rdsaAsks),
   notificationEvents: many(notificationEvents),
   reviews: many(reviews),
+  weeklyCheckin: one(userWeeklyCheckins, { fields: [users.id], references: [userWeeklyCheckins.userId] }),
+  dailyQuestionnaires: many(userDailyQuestionnaires),
+  patientAppointments: many(doctorAppointments, { relationName: 'patientAppointments' }),
 }));
 
 export const doctorsRelations = relations(doctors, ({ one, many }) => ({
   user: one(users, { fields: [doctors.userId], references: [users.id] }),
   userDoctors: many(userDoctors),
   reviews: many(reviews),
+  appointments: many(doctorAppointments),
 }));
 
 export const userDoctorsRelations = relations(userDoctors, ({ one }) => ({
@@ -342,6 +403,23 @@ export const reviewItemsRelations = relations(reviewItems, ({ one }) => ({
   review: one(reviews, { fields: [reviewItems.reviewId], references: [reviews.id] }),
 }));
 
+export const userWeeklyCheckinsRelations = relations(userWeeklyCheckins, ({ one }) => ({
+  user: one(users, { fields: [userWeeklyCheckins.userId], references: [users.id] }),
+}));
+
+export const userDailyQuestionnairesRelations = relations(userDailyQuestionnaires, ({ one }) => ({
+  user: one(users, { fields: [userDailyQuestionnaires.userId], references: [users.id] }),
+}));
+
+export const doctorAppointmentsRelations = relations(doctorAppointments, ({ one }) => ({
+  doctor: one(doctors, { fields: [doctorAppointments.doctorId], references: [doctors.id] }),
+  patient: one(users, {
+    fields: [doctorAppointments.patientId],
+    references: [users.id],
+    relationName: 'patientAppointments',
+  }),
+}));
+
 // ── Type Exports ───────────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -354,3 +432,6 @@ export type RdsaAsk = typeof rdsaAsks.$inferSelect;
 export type RecordTransfer = typeof recordTransfers.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type ReviewItem = typeof reviewItems.$inferSelect;
+export type UserWeeklyCheckin = typeof userWeeklyCheckins.$inferSelect;
+export type UserDailyQuestionnaire = typeof userDailyQuestionnaires.$inferSelect;
+export type DoctorAppointment = typeof doctorAppointments.$inferSelect;
