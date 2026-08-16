@@ -5,6 +5,7 @@ import { PortalError } from '../services/portal/doctor-context';
 import { getDoctorPortalProfile, updateDoctorPortalProfile } from '../services/portal/profile';
 import {
   createPatientRecord,
+  deletePatientRecord,
   getDailyQuestionnaireLog,
   getLatestAiSummary,
   getPatientMonitorDetail,
@@ -95,24 +96,82 @@ portal.post('/patients/:patientId/records', async (c) => {
     if (!Number.isFinite(patientId)) return errorResponse(c, 'ID pasien tidak valid');
 
     const body = await c.req.json();
-    const type = String(body.type ?? '').trim();
     const title = String(body.title ?? '').trim();
-    if (!['consultation', 'image', 'voice', 'note'].includes(type)) {
-      return errorResponse(c, 'Tipe rekam medis tidak valid');
-    }
+    const fileBase64 = body.fileBase64 ? String(body.fileBase64) : '';
     if (!title) return errorResponse(c, 'Judul rekam medis wajib diisi');
+    if (!fileBase64) return errorResponse(c, 'File PDF wajib diunggah');
+
+    const typeRaw = String(body.type ?? 'image').trim();
+    const type = (['consultation', 'image', 'voice', 'note'].includes(typeRaw)
+      ? typeRaw
+      : 'image') as 'consultation' | 'image' | 'voice' | 'note';
 
     const record = await createPatientRecord(c.get('userId') as number, patientId, {
-      type: type as 'consultation' | 'image' | 'voice' | 'note',
+      type,
       title,
       content: body.content ?? null,
-      summary: body.summary ?? null,
-      tags: Array.isArray(body.tags) ? body.tags : [],
+      summary: body.summary ?? 'Upload dokter',
+      tags: Array.isArray(body.tags) ? body.tags : ['PDF', 'Dokter'],
       doctorName: body.doctorName ?? null,
       recordDate: body.recordDate ?? null,
+      fileName: body.fileName ? String(body.fileName) : 'document.pdf',
+      fileBase64,
     });
     if (!record) return errorResponse(c, 'Pasien partner tidak ditemukan', 404);
     return successResponse(c, record, 201);
+  } catch (err) {
+    return handlePortalError(c, err);
+  }
+});
+
+portal.get('/patients/:patientId/records/:recordId/file', async (c) => {
+  try {
+    const patientId = parseInt(c.req.param('patientId'), 10);
+    const recordId = parseInt(c.req.param('recordId'), 10);
+    if (!Number.isFinite(patientId) || !Number.isFinite(recordId)) {
+      return errorResponse(c, 'ID tidak valid');
+    }
+
+    const detail = await getPatientMonitorDetail(c.get('userId') as number, patientId);
+    if (!detail) return errorResponse(c, 'Pasien partner tidak ditemukan', 404);
+
+    const { db } = await import('../db');
+    const { medicalRecords } = await import('../db/schema');
+    const { and, eq } = await import('drizzle-orm');
+    const { resolveRecordFilePath } = await import('../services/record-files');
+
+    const record = await db.query.medicalRecords.findFirst({
+      where: and(eq(medicalRecords.id, recordId), eq(medicalRecords.userId, patientId)),
+    });
+    if (!record?.fileKey) return errorResponse(c, 'File tidak ditemukan', 404);
+
+    const fullPath = resolveRecordFilePath(record.fileKey);
+    const file = Bun.file(fullPath);
+    if (!(await file.exists())) return errorResponse(c, 'File tidak ditemukan', 404);
+
+    return new Response(file, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${record.fileKey}"`,
+      },
+    });
+  } catch (err) {
+    return handlePortalError(c, err);
+  }
+});
+
+portal.delete('/patients/:patientId/records/:recordId', async (c) => {
+  try {
+    const patientId = parseInt(c.req.param('patientId'), 10);
+    const recordId = parseInt(c.req.param('recordId'), 10);
+    if (!Number.isFinite(patientId) || !Number.isFinite(recordId)) {
+      return errorResponse(c, 'ID tidak valid');
+    }
+
+    const deleted = await deletePatientRecord(c.get('userId') as number, patientId, recordId);
+    if (deleted == null) return errorResponse(c, 'Pasien partner tidak ditemukan', 404);
+    if (!deleted) return errorResponse(c, 'Rekam medis tidak ditemukan', 404);
+    return successResponse(c, { deleted: true });
   } catch (err) {
     return handlePortalError(c, err);
   }

@@ -94,6 +94,61 @@ Cek: http://localhost:3000/health
 | `bun run db:generate` | Generate migration SQL |
 | `bun run db:studio` | Drizzle Studio |
 | `bun run db:seed-arms` | Seed 275 notification arms (RDSA) |
+| `bun run db:migrate-portal` | Migrasi tabel doctor portal (non-interaktif) |
+| `bun run db:seed-portal` | Seed demo pasien + kuisioner + janji untuk web dokter |
+
+## Doctor portal (web-sehatica)
+
+Setelah `db:push`, jalankan migrasi portal dan seed demo:
+
+```sh
+bun run db:migrate-portal
+bun run db:seed-portal
+```
+
+Login web dokter: `dokter@sehatica.test` / `password123`
+
+### API portal (auth dokter)
+
+| Method | Path | Keterangan |
+|---|---|---|
+| GET/PATCH | `/api/v1/portal/me` | Profil dokter |
+| GET | `/api/v1/portal/patients` | Daftar pasien partner |
+| GET | `/api/v1/portal/patients/:id` | Monitor detail pasien |
+| GET | `/api/v1/portal/patients/:id/questionnaires/:date` | Log kuisioner harian |
+| GET | `/api/v1/portal/patients/:id/questionnaires/latest-summary` | Ringkasan AI terbaru |
+| GET/POST/DELETE | `/api/v1/portal/appointments` | Janji dokter ↔ pasien |
+
+### Sync mobile → backend
+
+| Method | Path | Keterangan |
+|---|---|---|
+| POST | `/api/v1/health/weekly-sync` | Cek mingguan |
+| POST | `/api/v1/health/questionnaire-sync` | Kuisioner harian lengkap |
+| GET | `/api/v1/appointments` | Janji pasien (dari dokter) |
+
+Struktur kode portal: `src/routes/portal.ts`, `src/services/portal/*`
+
+### Ringkasan AI kuisioner (Groq)
+
+Ringkasan **tidak** mengirim 52 field mentah ke LLM. Backend melakukan preprocessing ke compact JSON (~300 token), lalu memanggil Groq.
+
+Wajib di `.env`:
+
+```env
+LLM_PROVIDER=groq
+LLM_API_KEY=gsk_...
+LLM_MODEL=openai/gpt-oss-120b
+```
+
+| Mode | Kapan | Input ke LLM |
+|---|---|---|
+| **Health Summary** | Kuisioner pertama / tanpa riwayat sebelumnya | demographic + lifestyle + anthropometric + risk band |
+| **Daily delta** | Ada kuisioner hari sebelumnya | perbandingan activity, sedentary, calories, sugar, sodium |
+
+Tanpa `LLM_MODEL` + key, backend memakai fallback teks singkat (dev mode).
+
+Dipanggil otomatis saat `POST /health/questionnaire-sync` dan saat daily-sync menyertakan `questionnaire`.
 
 ## LLM & RDSA
 

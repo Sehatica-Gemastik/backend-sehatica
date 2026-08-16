@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../db';
-import { doctors, userDoctors, recordTransfers } from '../db/schema';
+import { doctors, userDoctors, recordTransfers, medicalRecords } from '../db/schema';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
+import { saveRecordPdf } from '../services/record-files';
 
 const doctorsRoute = new Hono();
 
@@ -174,6 +175,34 @@ doctorsRoute.post('/partners/:doctorId/record-transfers', async (c) => {
       return errorResponse(c, 'Judul dokumen wajib diisi');
     }
 
+    const fileName = body.fileName ? String(body.fileName) : 'document.pdf';
+    const fileBase64 = body.fileBase64
+      ? String(body.fileBase64).replace(/^data:[^;]+;base64,/, '')
+      : '';
+
+    let medicalRecordId: number | null = null;
+    if (fileBase64) {
+      const saved = await saveRecordPdf({ userId, fileName, base64: fileBase64 });
+      const [record] = await db.insert(medicalRecords).values({
+        userId,
+        type: 'image',
+        title: recordTitle,
+        content: null,
+        summary: 'Diterima via Bluetooth',
+        fileKey: saved.fileKey,
+        fileUrl: null,
+        tags: ['PDF', 'Bluetooth'],
+        recordDate: new Date().toISOString().slice(0, 10),
+        isAiSummarized: false,
+      }).returning();
+      medicalRecordId = record.id;
+      const fileUrl = `/api/v1/portal/patients/${userId}/records/${record.id}/file`;
+      await db
+        .update(medicalRecords)
+        .set({ fileUrl })
+        .where(eq(medicalRecords.id, record.id));
+    }
+
     const [row] = await db
       .insert(recordTransfers)
       .values({
@@ -181,7 +210,7 @@ doctorsRoute.post('/partners/:doctorId/record-transfers', async (c) => {
         doctorId,
         localRecordId: Number.isFinite(Number(body.recordId)) ? Number(body.recordId) : null,
         recordTitle,
-        fileName: body.fileName ? String(body.fileName) : null,
+        fileName,
         byteSize: Math.max(0, Number(body.byteSize ?? 0)),
         transferMethod: 'bluetooth',
         status: 'completed',
@@ -193,6 +222,7 @@ doctorsRoute.post('/partners/:doctorId/record-transfers', async (c) => {
       doctorId: row.doctorId,
       recordTitle: row.recordTitle,
       status: row.status,
+      medicalRecordId,
       createdAt: row.createdAt.toISOString(),
     }, 201);
   } catch (err) {

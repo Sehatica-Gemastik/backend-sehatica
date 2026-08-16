@@ -2,7 +2,6 @@ import { and, desc, eq, gte, inArray } from 'drizzle-orm';
 import { db } from '../../db';
 import {
   medicalRecords,
-  recordTransfers,
   userDailyCompliance,
   userDailyQuestionnaires,
   userDoctors,
@@ -11,7 +10,6 @@ import {
 } from '../../db/schema';
 import { getDoctorByUserId } from './doctor-context';
 import { mapQuestionnairePayload } from './questionnaire-mapper';
-import { summarizeMedicalRecord } from '../ai';
 
 function daysAgo(n: number) {
   const d = new Date();
@@ -108,7 +106,7 @@ export async function getPatientMonitorDetail(doctorUserId: number, patientUserI
   const user = link.user;
   const fromDate = daysAgo(364);
 
-  const [weekly, complianceRows, questionnaires, records, transfers] = await Promise.all([
+  const [weekly, complianceRows, questionnaires, records] = await Promise.all([
     db.query.userWeeklyCheckins.findFirst({ where: eq(userWeeklyCheckins.userId, user.id) }),
     db.query.userDailyCompliance.findMany({
       where: and(
@@ -126,15 +124,7 @@ export async function getPatientMonitorDetail(doctorUserId: number, patientUserI
     db.query.medicalRecords.findMany({
       where: eq(medicalRecords.userId, user.id),
       orderBy: [desc(medicalRecords.createdAt)],
-      limit: 20,
-    }),
-    db.query.recordTransfers.findMany({
-      where: and(
-        eq(recordTransfers.userId, user.id),
-        eq(recordTransfers.doctorId, doctor.id),
-      ),
-      orderBy: [desc(recordTransfers.createdAt)],
-      limit: 20,
+      limit: 40,
     }),
   ]);
 
@@ -191,26 +181,41 @@ export async function getPatientMonitorDetail(doctorUserId: number, patientUserI
     };
   });
 
-  const monitorRecords = [
-    ...transfers.map((row) => ({
-      id: row.id,
-      title: row.recordTitle,
-      type: 'transfer',
-      recordDate: row.createdAt.toISOString().slice(0, 10),
-      summary: `Transfer ${row.transferMethod} · ${row.fileName ?? 'dokumen'}`,
-      source: 'transfer' as const,
-      createdAt: row.createdAt.toISOString(),
-    })),
-    ...records.map((row) => ({
-      id: row.id + 100000,
-      title: row.title,
-      type: row.type,
-      recordDate: row.recordDate,
-      summary: row.summary,
-      source: 'record' as const,
-      createdAt: row.createdAt.toISOString(),
-    })),
-  ].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  // only files that arrived via bluetooth transfer or doctor portal upload
+  const monitorRecords = records
+    .filter((row) => {
+      if (!row.fileKey) return false;
+      const tags = row.tags ?? [];
+      const summary = (row.summary ?? '').toLowerCase();
+      return (
+        tags.includes('Bluetooth')
+        || tags.includes('Dokter')
+        || summary.includes('bluetooth')
+        || summary.includes('dokter')
+      );
+    })
+    .map((row) => {
+      const viaBluetooth = (row.tags ?? []).includes('Bluetooth')
+        || (row.summary ?? '').toLowerCase().includes('bluetooth');
+      const viaDoctor = (row.tags ?? []).includes('Dokter')
+        || (row.summary ?? '').toLowerCase().includes('dokter');
+      return {
+        id: row.id,
+        title: row.title,
+        type: row.type,
+        recordDate: row.recordDate,
+        summary: viaBluetooth
+          ? 'Diterima via Bluetooth'
+          : viaDoctor
+            ? 'Upload dokter'
+            : (row.summary ?? 'Dokumen PDF'),
+        source: 'record' as const,
+        fileUrl: row.fileUrl
+          ?? `/api/v1/portal/patients/${user.id}/records/${row.id}/file`,
+        createdAt: row.createdAt.toISOString(),
+      };
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   const dailyLogs: Record<string, ReturnType<typeof mapQuestionnairePayload>> = {};
   for (const row of questionnaires) {
@@ -327,13 +332,15 @@ export async function revokePartnerPatient(doctorUserId: number, patientUserId: 
 }
 
 export type CreatePatientRecordInput = {
-  type: 'consultation' | 'image' | 'voice' | 'note';
+  type?: 'consultation' | 'image' | 'voice' | 'note';
   title: string;
   content?: string | null;
   summary?: string | null;
   tags?: string[];
   doctorName?: string | null;
   recordDate?: string | null;
+  fileName?: string | null;
+  fileBase64?: string | null;
 };
 
 export async function createPatientRecord(
@@ -349,31 +356,83 @@ export async function createPatientRecord(
   });
   if (!link) return null;
 
-  let summary = input.summary ?? null;
-  if (input.content && !summary) {
-    try {
-      summary = await summarizeMedicalRecord(input.content, input.type, patientUserId);
-    } catch {
-      summary = null;
-    }
+  const fileBase64 = input.fileBase64
+    ? String(input.fileBase64).replace(/^data:[^;]+;base64,/, '')
+    : '';
+
+  let fileKey: string | null = null;
+  if (fileBase64) {
+    const { saveRecordPdf } = await import('../record-files');
+    const saved = await saveRecordPdf({
+      userId: patientUserId,
+      fileName: input.fileName ?? 'document.pdf',
+      base64: fileBase64,
+    });
+    fileKey = saved.fileKey;
   }
 
   const [record] = await db
     .insert(medicalRecords)
     .values({
       userId: patientUserId,
-      type: input.type,
+      type: input.type ?? (fileKey ? 'image' : 'note'),
       title: input.title,
       content: input.content ?? null,
-      summary,
-      tags: input.tags ?? [],
+      summary: input.summary ?? (fileKey ? 'Upload dokter' : null),
+      fileKey,
+      fileUrl: null,
+      tags: input.tags ?? (fileKey ? ['PDF', 'Dokter'] : []),
       doctorName: input.doctorName ?? doctor.user?.name ?? null,
-      recordDate: input.recordDate ?? null,
-      isAiSummarized: !!summary,
+      recordDate: input.recordDate ?? new Date().toISOString().slice(0, 10),
+      isAiSummarized: false,
     })
     .returning();
 
+  if (fileKey) {
+    const fileUrl = `/api/v1/portal/patients/${patientUserId}/records/${record.id}/file`;
+    await db
+      .update(medicalRecords)
+      .set({ fileUrl })
+      .where(eq(medicalRecords.id, record.id));
+    return { ...record, fileUrl };
+  }
+
   return record;
+}
+
+export async function deletePatientRecord(
+  doctorUserId: number,
+  patientUserId: number,
+  recordId: number,
+) {
+  const doctor = await getDoctorByUserId(doctorUserId);
+  if (!doctor) return null;
+
+  const link = await db.query.userDoctors.findFirst({
+    where: and(eq(userDoctors.doctorId, doctor.id), eq(userDoctors.userId, patientUserId)),
+  });
+  if (!link) return null;
+
+  const record = await db.query.medicalRecords.findFirst({
+    where: and(eq(medicalRecords.id, recordId), eq(medicalRecords.userId, patientUserId)),
+  });
+  if (!record) return false;
+
+  if (record.fileKey) {
+    try {
+      const { unlink } = await import('node:fs/promises');
+      const { resolveRecordFilePath } = await import('../record-files');
+      await unlink(resolveRecordFilePath(record.fileKey));
+    } catch {
+      // file may already be missing
+    }
+  }
+
+  await db
+    .delete(medicalRecords)
+    .where(and(eq(medicalRecords.id, recordId), eq(medicalRecords.userId, patientUserId)));
+
+  return true;
 }
 
 export async function getPatientNames(patientIds: number[]) {
