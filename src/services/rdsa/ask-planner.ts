@@ -5,12 +5,14 @@ import {
   users,
   schedules,
 } from '../../db/schema';
-import { and, asc, eq, inArray, lt } from 'drizzle-orm';
-import { recommendArm, recordSelection, recordReward } from './recommend';
+import { and, asc, eq, inArray, isNull, lt } from 'drizzle-orm';
+import { recommendArm, recordSelection, recordReward, recordIntentOutcome } from './recommend';
 
 const SCHEDULE_TYPES = ['pill', 'food', 'water', 'exercise'] as const;
+const COMPLIANCE_WINDOW_MS = Number(process.env.RDSA_COMPLIANCE_WINDOW_HOURS ?? '2') * 60 * 60 * 1000;
 
 type ScheduleContext = {
+  id: number;
   label: string;
   time: string;
   detail: string | null;
@@ -36,7 +38,7 @@ async function findScheduleContext(
   });
 
   if (!match) return null;
-  return { label: match.label, time: match.time, detail: match.detail };
+  return { id: match.id, label: match.label, time: match.time, detail: match.detail };
 }
 
 function renderTemplate(
@@ -102,6 +104,7 @@ export async function planAndDeliverAsk(
       channels: ['push'],
       deliveredAt: new Date(),
       expiresAt,
+      scheduleId: scheduleContext?.id ?? null,
     })
     .returning();
 
@@ -138,8 +141,42 @@ export async function expireStaleAsks(userId: number) {
     );
 }
 
+/**
+ * For asks tied to a specific schedule (schedule.* intents), the real success
+ * signal is "did the patient actually complete the schedule", not just tapping
+ * the notification. Once the compliance window has passed, resolve success/
+ * failure into rdsaIntentStatistics based on schedules.done.
+ */
+export async function resolveAskOutcomes(userId: number) {
+  const candidates = await db.query.rdsaAsks.findMany({
+    where: and(
+      eq(rdsaAsks.userId, userId),
+      isNull(rdsaAsks.outcomeResolvedAt)
+    ),
+  });
+
+  const now = Date.now();
+
+  for (const ask of candidates) {
+    if (ask.scheduleId === null) continue;
+    if (now - ask.createdAt.getTime() < COMPLIANCE_WINDOW_MS) continue;
+
+    const schedule = await db.query.schedules.findFirst({
+      where: eq(schedules.id, ask.scheduleId),
+    });
+    const success = schedule?.done === true;
+
+    await recordIntentOutcome(ask.userId, ask.intent, success);
+    await db
+      .update(rdsaAsks)
+      .set({ outcomeResolvedAt: new Date() })
+      .where(eq(rdsaAsks.id, ask.id));
+  }
+}
+
 export async function listPendingAsks(userId: number) {
   await expireStaleAsks(userId);
+  await resolveAskOutcomes(userId);
   return db.query.rdsaAsks.findMany({
     where: and(
       eq(rdsaAsks.userId, userId),
@@ -184,6 +221,14 @@ export async function acknowledgeAsk(userId: number, askId: string) {
       .where(eq(notificationEvents.askId, askId));
 
     await recordReward(updated.armId, reward, true);
+
+    // Schedule-linked asks (schedule.* intents) get their success/failure from
+    // actual schedule completion via resolveAskOutcomes, not from tapping ack —
+    // only record here for intents with no linked schedule (ask.checkin, insight.tip, etc).
+    if (updated.scheduleId === null) {
+      await recordIntentOutcome(updated.userId, updated.intent, true);
+    }
+
     return rewarded;
   }
 
