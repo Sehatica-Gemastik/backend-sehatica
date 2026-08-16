@@ -3,6 +3,7 @@ import {
   notificationArms,
   notificationArmStatistics,
   notificationEvents,
+  rdsaIntentStatistics,
   schedules,
   rdsaAsks,
 } from '../../db/schema';
@@ -12,6 +13,7 @@ import {
   scheduleFlagsFromSnapshot,
   shouldSuppressArm,
 } from '../compliance/daily-compliance';
+import { pickByThompsonSampling } from './thompson-sampling';
 
 export type RecommendContext = {
   localHour?: number;
@@ -30,39 +32,14 @@ export type ScoredArm = {
 };
 
 const PRIOR = 0.5;
-const TEMPERATURE = Number(process.env.RDSA_SOFTMAX_TEMPERATURE ?? '0.35');
-const RECENCY_HALF_LIFE_DAYS = Number(process.env.RDSA_RECENCY_HALF_LIFE_DAYS ?? '3');
 const MAX_ASKS_PER_DAY = Number(process.env.RDSA_MAX_ASKS_PER_DAY ?? '5');
 const QUIET_START = Number(process.env.RDSA_QUIET_HOURS_START ?? '22');
 const QUIET_END = Number(process.env.RDSA_QUIET_HOURS_END ?? '6');
+/** How many of the most-recently-sent arms (any intent) to avoid repeating verbatim. */
+const RECENT_ARM_AVOID_COUNT = 5;
 
 function differenceScore(muPlus: number, muMinus: number): number {
   return muPlus - muMinus;
-}
-
-function recencyPenalty(daysSince: number | null): number {
-  if (daysSince === null) return 0;
-  // recovering: penalty decays with time since last send
-  return Math.exp(-daysSince / RECENCY_HALF_LIFE_DAYS) * 0.4;
-}
-
-function softmax(scores: number[], temperature: number): number[] {
-  const t = Math.max(temperature, 0.05);
-  const scaled = scores.map((s) => s / t);
-  const max = Math.max(...scaled);
-  const exps = scaled.map((s) => Math.exp(s - max));
-  const sum = exps.reduce((a, b) => a + b, 0) || 1;
-  return exps.map((e) => e / sum);
-}
-
-function pickWeighted(weights: number[]): number {
-  const r = Math.random();
-  let acc = 0;
-  for (let i = 0; i < weights.length; i++) {
-    acc += weights[i];
-    if (r <= acc) return i;
-  }
-  return weights.length - 1;
 }
 
 function hourToIntents(hour: number): string[] {
@@ -143,6 +120,42 @@ export async function getEligibleArms(userId: number, ctx: RecommendContext) {
   });
 }
 
+async function getOrCreateIntentStats(userId: number, intent: string) {
+  const existing = await db.query.rdsaIntentStatistics.findFirst({
+    where: and(eq(rdsaIntentStatistics.userId, userId), eq(rdsaIntentStatistics.intent, intent)),
+  });
+  if (existing) return existing;
+
+  const [created] = await db
+    .insert(rdsaIntentStatistics)
+    .values({ userId, intent })
+    .onConflictDoNothing()
+    .returning();
+
+  return (
+    created ??
+    (await db.query.rdsaIntentStatistics.findFirst({
+      where: and(eq(rdsaIntentStatistics.userId, userId), eq(rdsaIntentStatistics.intent, intent)),
+    }))!
+  );
+}
+
+async function getRecentlySentArmIds(userId: number, limit: number): Promise<Set<string>> {
+  const recent = await db.query.notificationEvents.findMany({
+    where: eq(notificationEvents.userId, userId),
+    orderBy: [desc(notificationEvents.sentAt)],
+    limit,
+  });
+  return new Set(recent.map((event) => event.armId));
+}
+
+/**
+ * Two-stage pick:
+ * 1. Thompson Sampling over eligible *intents* (schedule.pill, ask.checkin, ...) —
+ *    this is the level where we actually have enough signal to learn per user.
+ * 2. Plain rotation over the arms (exact wording) within the winning intent —
+ *    wording variety doesn't need statistics, just avoid repeating recently-sent text.
+ */
 export async function recommendArm(
   userId: number,
   ctx: RecommendContext = {}
@@ -150,71 +163,74 @@ export async function recommendArm(
   const eligible = await getEligibleArms(userId, ctx);
   if (eligible.length === 0) return null;
 
-  const candidates: Array<ScoredArm & { rawScore: number }> = [];
-
+  const armsByIntent = new Map<string, typeof eligible>();
   for (const arm of eligible) {
-    let stats = await db.query.notificationArmStatistics.findFirst({
-      where: eq(notificationArmStatistics.armId, arm.armId),
-    });
-    if (!stats) {
-      const [created] = await db
-        .insert(notificationArmStatistics)
-        .values({ armId: arm.armId })
-        .onConflictDoNothing()
-        .returning();
-      stats =
-        created ??
-        (await db.query.notificationArmStatistics.findFirst({
-          where: eq(notificationArmStatistics.armId, arm.armId),
-        }));
-    }
+    const list = armsByIntent.get(arm.intent) ?? [];
+    list.push(arm);
+    armsByIntent.set(arm.intent, list);
+  }
+  const intents = [...armsByIntent.keys()];
 
-    const muPlus = stats ? Number(stats.muPlus) : PRIOR;
-    const base = muPlus;
-
-    const last = await db.query.notificationEvents.findFirst({
-      where: and(eq(notificationEvents.userId, userId), eq(notificationEvents.armId, arm.armId)),
-      orderBy: [desc(notificationEvents.sentAt)],
-    });
-    const daysSince = last
-      ? (Date.now() - last.sentAt.getTime()) / (1000 * 60 * 60 * 24)
-      : null;
-
-    const rawScore = base - recencyPenalty(daysSince);
-    candidates.push({
-      armId: arm.armId,
-      intent: arm.intent,
-      title: arm.title,
-      body: arm.body,
-      channels: arm.channels,
-      score: rawScore,
-      probability: 0,
-      rawScore,
-    });
+  const statsByIntent = new Map<string, { successCount: number; failureCount: number }>();
+  for (const intent of intents) {
+    const stats = await getOrCreateIntentStats(userId, intent);
+    statsByIntent.set(intent, { successCount: stats.successCount, failureCount: stats.failureCount });
   }
 
-  const probs = softmax(
-    candidates.map((c) => c.rawScore),
-    TEMPERATURE
-  );
-  candidates.forEach((c, i) => {
-    c.probability = probs[i];
-  });
+  const chosenIntent = pickByThompsonSampling(intents, (intent) => statsByIntent.get(intent)!);
+  const armsForIntent = armsByIntent.get(chosenIntent)!;
 
-  const idx = pickWeighted(probs);
-  const chosen = candidates[idx];
+  const recentArmIds = await getRecentlySentArmIds(userId, RECENT_ARM_AVOID_COUNT);
+  const freshArms = armsForIntent.filter((arm) => !recentArmIds.has(arm.armId));
+  const pool = freshArms.length > 0 ? freshArms : armsForIntent;
+  const chosenArm = pool[Math.floor(Math.random() * pool.length)];
+
+  const chosenStats = statsByIntent.get(chosenIntent)!;
+  const total = chosenStats.successCount + chosenStats.failureCount;
+  const empiricalRate = total > 0 ? chosenStats.successCount / total : PRIOR;
 
   return {
-    armId: chosen.armId,
-    intent: chosen.intent,
-    title: chosen.title,
-    body: chosen.body,
-    channels: chosen.channels,
-    score: chosen.score,
-    probability: chosen.probability,
+    armId: chosenArm.armId,
+    intent: chosenArm.intent,
+    title: chosenArm.title,
+    body: chosenArm.body,
+    channels: chosenArm.channels,
+    score: empiricalRate,
+    probability: empiricalRate,
   };
 }
 
+/** Success/failure signal for the (userId, intent) Thompson Sampling stats. */
+export async function recordIntentOutcome(userId: number, intent: string, success: boolean) {
+  const existing = await db.query.rdsaIntentStatistics.findFirst({
+    where: and(eq(rdsaIntentStatistics.userId, userId), eq(rdsaIntentStatistics.intent, intent)),
+  });
+
+  if (!existing) {
+    await db.insert(rdsaIntentStatistics).values({
+      userId,
+      intent,
+      successCount: success ? 1 : 0,
+      failureCount: success ? 0 : 1,
+    });
+    return;
+  }
+
+  await db
+    .update(rdsaIntentStatistics)
+    .set({
+      successCount: success ? existing.successCount + 1 : existing.successCount,
+      failureCount: success ? existing.failureCount : existing.failureCount + 1,
+      updatedAt: new Date(),
+    })
+    .where(eq(rdsaIntentStatistics.id, existing.id));
+}
+
+/**
+ * Legacy per-arm bookkeeping (notification_arm_statistics). Kept for descriptive
+ * analytics ("which exact wording gets sent/acked most") — no longer used to
+ * choose which arm to send; that's rdsaIntentStatistics + Thompson Sampling above.
+ */
 export async function recordSelection(armId: string) {
   await db
     .insert(notificationArmStatistics)

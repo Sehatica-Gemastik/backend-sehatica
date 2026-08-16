@@ -300,7 +300,32 @@ export const rdsaAsks = pgTable('rdsa_asks', {
   repliedAt: timestamp('replied_at'),
   expiresAt: timestamp('expires_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  /** Specific schedule this ask targets, for compliance-based reward (RDSA v2) */
+  scheduleId: integer('schedule_id').references(() => schedules.id, { onDelete: 'set null' }),
+  /** Whether the compliance job has already resolved success/failure for this ask */
+  outcomeResolvedAt: timestamp('outcome_resolved_at'),
 });
+
+/** RDSA v2: Thompson Sampling stats per (user, intent) — replaces per-arm muPlus/muMinus for scoring */
+export const rdsaIntentStatistics = pgTable(
+  'rdsa_intent_statistics',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    intent: varchar('intent', { length: 64 }).notNull(),
+    successCount: integer('success_count').default(0).notNull(),
+    failureCount: integer('failure_count').default(0).notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIntentUnique: unique('rdsa_intent_statistics_user_intent').on(
+      table.userId,
+      table.intent,
+    ),
+  }),
+);
 
 // ── Doctor reviews (web portal) ────────────────────────────────────────────
 export const reviews = pgTable('reviews', {
