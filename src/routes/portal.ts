@@ -4,10 +4,12 @@ import { errorResponse, successResponse } from '../utils/response';
 import { PortalError } from '../services/portal/doctor-context';
 import { getDoctorPortalProfile, updateDoctorPortalProfile } from '../services/portal/profile';
 import {
+  createPatientRecord,
   getDailyQuestionnaireLog,
   getLatestAiSummary,
   getPatientMonitorDetail,
   listPartnerPatients,
+  revokePartnerPatient,
 } from '../services/portal/patient-monitor';
 import {
   createDoctorAppointment,
@@ -69,6 +71,48 @@ portal.get('/patients/:patientId', async (c) => {
     const detail = await getPatientMonitorDetail(c.get('userId') as number, patientId);
     if (!detail) return errorResponse(c, 'Pasien partner tidak ditemukan', 404);
     return successResponse(c, detail);
+  } catch (err) {
+    return handlePortalError(c, err);
+  }
+});
+
+portal.delete('/patients/:patientId', async (c) => {
+  try {
+    const patientId = parseInt(c.req.param('patientId'), 10);
+    if (!Number.isFinite(patientId)) return errorResponse(c, 'ID pasien tidak valid');
+
+    const revoked = await revokePartnerPatient(c.get('userId') as number, patientId);
+    if (!revoked) return errorResponse(c, 'Pasien partner tidak ditemukan', 404);
+    return successResponse(c, { deleted: true });
+  } catch (err) {
+    return handlePortalError(c, err);
+  }
+});
+
+portal.post('/patients/:patientId/records', async (c) => {
+  try {
+    const patientId = parseInt(c.req.param('patientId'), 10);
+    if (!Number.isFinite(patientId)) return errorResponse(c, 'ID pasien tidak valid');
+
+    const body = await c.req.json();
+    const type = String(body.type ?? '').trim();
+    const title = String(body.title ?? '').trim();
+    if (!['consultation', 'image', 'voice', 'note'].includes(type)) {
+      return errorResponse(c, 'Tipe rekam medis tidak valid');
+    }
+    if (!title) return errorResponse(c, 'Judul rekam medis wajib diisi');
+
+    const record = await createPatientRecord(c.get('userId') as number, patientId, {
+      type: type as 'consultation' | 'image' | 'voice' | 'note',
+      title,
+      content: body.content ?? null,
+      summary: body.summary ?? null,
+      tags: Array.isArray(body.tags) ? body.tags : [],
+      doctorName: body.doctorName ?? null,
+      recordDate: body.recordDate ?? null,
+    });
+    if (!record) return errorResponse(c, 'Pasien partner tidak ditemukan', 404);
+    return successResponse(c, record, 201);
   } catch (err) {
     return handlePortalError(c, err);
   }

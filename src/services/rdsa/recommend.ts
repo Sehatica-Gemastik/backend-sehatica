@@ -170,8 +170,7 @@ export async function recommendArm(
     }
 
     const muPlus = stats ? Number(stats.muPlus) : PRIOR;
-    const muMinus = stats ? Number(stats.muMinus) : PRIOR;
-    const base = differenceScore(muPlus, muMinus);
+    const base = muPlus;
 
     const last = await db.query.notificationEvents.findFirst({
       where: and(eq(notificationEvents.userId, userId), eq(notificationEvents.armId, arm.armId)),
@@ -204,24 +203,6 @@ export async function recommendArm(
 
   const idx = pickWeighted(probs);
   const chosen = candidates[idx];
-
-  // mark eligible-not-selected for counterfactual stats (count only)
-  for (let i = 0; i < candidates.length; i++) {
-    if (i === idx) continue;
-    await db
-      .insert(notificationArmStatistics)
-      .values({
-        armId: candidates[i].armId,
-        eligibleNotSelectedCount: 1,
-      })
-      .onConflictDoUpdate({
-        target: notificationArmStatistics.armId,
-        set: {
-          eligibleNotSelectedCount: sql`${notificationArmStatistics.eligibleNotSelectedCount} + 1`,
-          updatedAt: new Date(),
-        },
-      });
-  }
 
   return {
     armId: chosen.armId,

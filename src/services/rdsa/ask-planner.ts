@@ -3,16 +3,55 @@ import {
   rdsaAsks,
   notificationEvents,
   users,
+  schedules,
 } from '../../db/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, lt } from 'drizzle-orm';
 import { recommendArm, recordSelection, recordReward } from './recommend';
 
-function renderTemplate(text: string, name?: string | null): string {
+const SCHEDULE_TYPES = ['pill', 'food', 'water', 'exercise'] as const;
+
+type ScheduleContext = {
+  label: string;
+  time: string;
+  detail: string | null;
+};
+
+async function findScheduleContext(
+  userId: number,
+  intent: string
+): Promise<ScheduleContext | null> {
+  const scheduleType = intent.startsWith('schedule.') ? intent.slice('schedule.'.length) : null;
+  if (!scheduleType || !SCHEDULE_TYPES.includes(scheduleType as (typeof SCHEDULE_TYPES)[number])) {
+    return null;
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const match = await db.query.schedules.findFirst({
+    where: and(
+      eq(schedules.userId, userId),
+      eq(schedules.type, scheduleType as (typeof SCHEDULE_TYPES)[number]),
+      eq(schedules.scheduleDate, today)
+    ),
+    orderBy: [asc(schedules.done)],
+  });
+
+  if (!match) return null;
+  return { label: match.label, time: match.time, detail: match.detail };
+}
+
+function renderTemplate(
+  text: string,
+  name?: string | null,
+  schedule?: ScheduleContext | null
+): string {
   const suffix = name ? `, ${name.split(' ')[0]}` : '';
   return text
     .replaceAll('{{name_suffix}}', suffix)
     .replaceAll('{{name}}', name?.split(' ')[0] ?? 'kamu')
-    .replaceAll('{{user_name}}', name ?? 'kamu');
+    .replaceAll('{{user_name}}', name ?? 'kamu')
+    .replaceAll('{{label}}', schedule?.label ?? 'jadwal kamu')
+    .replaceAll('{{time}}', schedule?.time ?? 'sebentar lagi')
+    .replaceAll('{{detail}}', schedule?.detail ? ` — ${schedule.detail}` : '');
 }
 
 function newAskId(): string {
@@ -44,8 +83,9 @@ export async function planAndDeliverAsk(
   if (!selected) return null;
 
   const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
-  const title = renderTemplate(selected.title, user?.name);
-  const body = renderTemplate(selected.body, user?.name);
+  const scheduleContext = await findScheduleContext(userId, selected.intent);
+  const title = renderTemplate(selected.title, user?.name, scheduleContext);
+  const body = renderTemplate(selected.body, user?.name, scheduleContext);
   const askId = newAskId();
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
@@ -85,7 +125,21 @@ export async function planAndDeliverAsk(
   };
 }
 
+export async function expireStaleAsks(userId: number) {
+  await db
+    .update(rdsaAsks)
+    .set({ status: 'expired' })
+    .where(
+      and(
+        eq(rdsaAsks.userId, userId),
+        inArray(rdsaAsks.status, ['pending', 'delivered']),
+        lt(rdsaAsks.expiresAt, new Date())
+      )
+    );
+}
+
 export async function listPendingAsks(userId: number) {
+  await expireStaleAsks(userId);
   return db.query.rdsaAsks.findMany({
     where: and(
       eq(rdsaAsks.userId, userId),

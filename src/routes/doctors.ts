@@ -127,6 +127,31 @@ doctorsRoute.post('/partners', async (c) => {
   }
 });
 
+// DELETE /doctors/partners/:doctorId — revoke a linked partner (patient-initiated)
+doctorsRoute.delete('/partners/:doctorId', async (c) => {
+  try {
+    const userId = c.get('userId') as number;
+    const doctorId = parseInt(c.req.param('doctorId'), 10);
+    if (!Number.isFinite(doctorId)) {
+      return errorResponse(c, 'ID dokter tidak valid');
+    }
+
+    const link = await db.query.userDoctors.findFirst({
+      where: and(eq(userDoctors.userId, userId), eq(userDoctors.doctorId, doctorId)),
+    });
+    if (!link) {
+      return errorResponse(c, 'Dokter partner tidak ditemukan', 404);
+    }
+
+    await db.delete(userDoctors).where(eq(userDoctors.id, link.id));
+
+    return successResponse(c, { deleted: true });
+  } catch (err) {
+    console.error('Revoke partner error:', err);
+    return errorResponse(c, 'Gagal mencabut dokter partner', 500);
+  }
+});
+
 // POST /doctors/partners/:doctorId/record-transfers — log Bluetooth file transfer
 doctorsRoute.post('/partners/:doctorId/record-transfers', async (c) => {
   try {
