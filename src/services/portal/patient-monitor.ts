@@ -11,6 +11,7 @@ import {
 } from '../../db/schema';
 import { getDoctorByUserId } from './doctor-context';
 import { mapQuestionnairePayload } from './questionnaire-mapper';
+import { summarizeMedicalRecord } from '../ai';
 
 function daysAgo(n: number) {
   const d = new Date();
@@ -310,6 +311,69 @@ export async function getLatestAiSummary(doctorUserId: number, patientUserId: nu
   if (!row?.aiSummary) return null;
 
   return { date: row.questionnaireDate, summary: row.aiSummary };
+}
+
+export async function revokePartnerPatient(doctorUserId: number, patientUserId: number) {
+  const doctor = await getDoctorByUserId(doctorUserId);
+  if (!doctor) return false;
+
+  const link = await db.query.userDoctors.findFirst({
+    where: and(eq(userDoctors.doctorId, doctor.id), eq(userDoctors.userId, patientUserId)),
+  });
+  if (!link) return false;
+
+  await db.delete(userDoctors).where(eq(userDoctors.id, link.id));
+  return true;
+}
+
+export type CreatePatientRecordInput = {
+  type: 'consultation' | 'image' | 'voice' | 'note';
+  title: string;
+  content?: string | null;
+  summary?: string | null;
+  tags?: string[];
+  doctorName?: string | null;
+  recordDate?: string | null;
+};
+
+export async function createPatientRecord(
+  doctorUserId: number,
+  patientUserId: number,
+  input: CreatePatientRecordInput,
+) {
+  const doctor = await getDoctorByUserId(doctorUserId);
+  if (!doctor) return null;
+
+  const link = await db.query.userDoctors.findFirst({
+    where: and(eq(userDoctors.doctorId, doctor.id), eq(userDoctors.userId, patientUserId)),
+  });
+  if (!link) return null;
+
+  let summary = input.summary ?? null;
+  if (input.content && !summary) {
+    try {
+      summary = await summarizeMedicalRecord(input.content, input.type, patientUserId);
+    } catch {
+      summary = null;
+    }
+  }
+
+  const [record] = await db
+    .insert(medicalRecords)
+    .values({
+      userId: patientUserId,
+      type: input.type,
+      title: input.title,
+      content: input.content ?? null,
+      summary,
+      tags: input.tags ?? [],
+      doctorName: input.doctorName ?? doctor.user?.name ?? null,
+      recordDate: input.recordDate ?? null,
+      isAiSummarized: !!summary,
+    })
+    .returning();
+
+  return record;
 }
 
 export async function getPatientNames(patientIds: number[]) {
