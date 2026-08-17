@@ -9,12 +9,7 @@
     "db:push": "drizzle-kit push",
     "db:push:prod": "bun --env-file=.env.prod drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:studio:prod": "bun --env-file=.env.prod drizzle-kit studio",
-    "db:seed-arms": "bun run src/scripts/seed-arms.ts",
-    "db:seed-portal": "bun run src/scripts/seed-portal-demo.ts",
-    "db:seed-demo": "bun run src/scripts/seed-demo-user.ts",
-    "db:migrate-portal": "bun run src/scripts/migrate-portal.ts",
-    "db:clear-questionnaire-logs": "bun run src/scripts/clear-questionnaire-logs.ts"
+    "db:studio:prod": "bun --env-file=.env.prod drizzle-kit studio"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
