@@ -3,6 +3,7 @@
     "strict": true,
     "types": ["bun"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }

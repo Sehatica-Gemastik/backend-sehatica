@@ -1,0 +1,8 @@
+uploads
+.git
+docker-compose.yml
+Dockerfile
+src/scripts
+scripts
+.env
+.env.prod

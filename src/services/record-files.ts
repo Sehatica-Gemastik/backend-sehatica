@@ -1,7 +1,9 @@
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const UPLOAD_ROOT = path.join(process.cwd(), 'uploads', 'records');
+const UPLOAD_ROOT = process.env.VERCEL
+  ? path.join('/tmp', 'uploads', 'records')
+  : path.join(process.cwd(), 'uploads', 'records');
 
 export async function ensureUploadDir() {
   await mkdir(UPLOAD_ROOT, { recursive: true });
@@ -10,6 +12,14 @@ export async function ensureUploadDir() {
 export function resolveRecordFilePath(fileKey: string) {
   const safe = path.basename(fileKey);
   return path.join(UPLOAD_ROOT, safe);
+}
+
+export async function readRecordFile(fileKey: string) {
+  try {
+    return await readFile(resolveRecordFilePath(fileKey));
+  } catch {
+    return null;
+  }
 }
 
 export async function saveRecordPdf(input: {
@@ -22,7 +32,7 @@ export async function saveRecordPdf(input: {
   const fileKey = `${input.userId}-${Date.now()}-${safeName}`;
   const fullPath = resolveRecordFilePath(fileKey);
   const bytes = Buffer.from(input.base64, 'base64');
-  await Bun.write(fullPath, bytes);
+  await writeFile(fullPath, bytes);
   return {
     fileKey,
     fileUrl: `/api/v1/records/${fileKey}/download-by-key`,

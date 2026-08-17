@@ -4,7 +4,7 @@ import { db } from '../db';
 import { medicalRecords } from '../db/schema';
 import { authMiddleware } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
-import { resolveRecordFilePath, saveRecordPdf } from '../services/record-files';
+import { readRecordFile, saveRecordPdf } from '../services/record-files';
 
 const records = new Hono();
 
@@ -131,9 +131,8 @@ records.get('/:id/file', async (c) => {
     });
     if (!record?.fileKey) return errorResponse(c, 'File tidak ditemukan', 404);
 
-    const fullPath = resolveRecordFilePath(record.fileKey);
-    const file = Bun.file(fullPath);
-    if (!(await file.exists())) return errorResponse(c, 'File tidak ditemukan', 404);
+    const file = await readRecordFile(record.fileKey);
+    if (!file) return errorResponse(c, 'File tidak ditemukan', 404);
 
     return new Response(file, {
       headers: {

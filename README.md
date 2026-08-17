@@ -95,7 +95,8 @@ Cek: http://localhost:3000/health
 | `bun run db:studio` | Drizzle Studio |
 | `bun run db:seed-arms` | Seed 275 notification arms (RDSA) |
 | `bun run db:migrate-portal` | Migrasi tabel doctor portal (non-interaktif) |
-| `bun run db:seed-portal` | Seed demo pasien + kuisioner + janji untuk web dokter |
+| `bun run db:seed-portal` | Seed ringan portal (tanpa kuisioner) |
+| `bun run db:seed-demo` | Seed lengkap `demo@sehatica.test` + dokter partner |
 
 ## Doctor portal (web-sehatica)
 
@@ -103,9 +104,12 @@ Setelah `db:push`, jalankan migrasi portal dan seed demo:
 
 ```sh
 bun run db:migrate-portal
-bun run db:seed-portal
+bun run db:seed-demo
 ```
 
+Login pasien mobile:
+- `demo@sehatica.test` / `password123`
+- `demo@test.com` (Muhammad Rizain Firdaus) / `password123`  
 Login web dokter: `dokter@sehatica.test` / `password123`
 
 ### API portal (auth dokter)

@@ -138,16 +138,15 @@ portal.get('/patients/:patientId/records/:recordId/file', async (c) => {
     const { db } = await import('../db');
     const { medicalRecords } = await import('../db/schema');
     const { and, eq } = await import('drizzle-orm');
-    const { resolveRecordFilePath } = await import('../services/record-files');
+    const { readRecordFile } = await import('../services/record-files');
 
     const record = await db.query.medicalRecords.findFirst({
       where: and(eq(medicalRecords.id, recordId), eq(medicalRecords.userId, patientId)),
     });
     if (!record?.fileKey) return errorResponse(c, 'File tidak ditemukan', 404);
 
-    const fullPath = resolveRecordFilePath(record.fileKey);
-    const file = Bun.file(fullPath);
-    if (!(await file.exists())) return errorResponse(c, 'File tidak ditemukan', 404);
+    const file = await readRecordFile(record.fileKey);
+    if (!file) return errorResponse(c, 'File tidak ditemukan', 404);
 
     return new Response(file, {
       headers: {

@@ -1,5 +1,11 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import clinicalDiabetes from './models/clinical/diabetes.json';
+import clinicalHeartDisease from './models/clinical/heart_disease.json';
+import clinicalHypertension from './models/clinical/hypertension.json';
+import clinicalStroke from './models/clinical/stroke.json';
+import lifestyleDiabetes from './models/lifestyle/diabetes.json';
+import lifestyleHeartDisease from './models/lifestyle/heart_disease.json';
+import lifestyleHypertension from './models/lifestyle/hypertension.json';
+import lifestyleStroke from './models/lifestyle/stroke.json';
 
 type PtmModel = {
   algorithm: string;
@@ -46,16 +52,21 @@ export type PtmRiskResult = {
 
 const TARGETS: PtmTarget[] = ['diabetes', 'hypertension', 'heart_disease', 'stroke'];
 
-const modelCache = new Map<string, PtmModel>();
+const MODELS: Record<string, PtmModel> = {
+  'clinical/diabetes': clinicalDiabetes as PtmModel,
+  'clinical/heart_disease': clinicalHeartDisease as PtmModel,
+  'clinical/hypertension': clinicalHypertension as PtmModel,
+  'clinical/stroke': clinicalStroke as PtmModel,
+  'lifestyle/diabetes': lifestyleDiabetes as PtmModel,
+  'lifestyle/heart_disease': lifestyleHeartDisease as PtmModel,
+  'lifestyle/hypertension': lifestyleHypertension as PtmModel,
+  'lifestyle/stroke': lifestyleStroke as PtmModel,
+};
 
 function loadModel(featureSet: PtmFeatureSet, target: PtmTarget): PtmModel {
   const key = `${featureSet}/${target}`;
-  const cached = modelCache.get(key);
-  if (cached) return cached;
-
-  const filePath = join(__dirname, 'models', featureSet, `${target}.json`);
-  const model = JSON.parse(readFileSync(filePath, 'utf-8')) as PtmModel;
-  modelCache.set(key, model);
+  const model = MODELS[key];
+  if (!model) throw new Error(`PTM model missing: ${key}`);
   return model;
 }
 
