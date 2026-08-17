@@ -95,16 +95,14 @@ Cek: http://localhost:3000/health
 | `bun run db:studio` | Drizzle Studio |
 | `bun run db:seed-arms` | Seed 275 notification arms (RDSA) |
 | `bun run db:migrate-portal` | Migrasi tabel doctor portal (non-interaktif) |
-| `bun run db:seed-portal` | Seed ringan portal (tanpa kuisioner) |
-| `bun run db:seed-demo` | Seed lengkap `demo@sehatica.test` + dokter partner |
 
 ## Doctor portal (web-sehatica)
 
-Setelah `db:push`, jalankan migrasi portal dan seed demo:
+Setelah `db:push`, jalankan migrasi portal:
 
 ```sh
 bun run db:migrate-portal
-bun run db:seed-demo
+bun run db:seed-arms
 ```
 
 Login pasien mobile:

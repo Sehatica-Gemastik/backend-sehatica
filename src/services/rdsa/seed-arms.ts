@@ -1,6 +1,6 @@
-import { db } from '../db';
-import { notificationArms, notificationArmStatistics } from '../db/schema';
-import armsSeed from '../data/notification-arms.json';
+import { db } from '../../db';
+import { notificationArms, notificationArmStatistics } from '../../db/schema';
+import armsSeed from '../../data/notification-arms.json';
 
 type SeedArm = {
   arm_id: string;
@@ -47,10 +47,4 @@ export async function seedNotificationArms() {
     upserted += 1;
   }
   return upserted;
-}
-
-if (import.meta.main) {
-  const n = await seedNotificationArms();
-  console.log(`Seeded ${n} notification arms`);
-  process.exit(0);
 }

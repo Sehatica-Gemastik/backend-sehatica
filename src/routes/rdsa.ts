@@ -7,7 +7,7 @@ import {
   listPendingAsks,
   acknowledgeAsk,
 } from '../services/rdsa/ask-planner';
-import { seedNotificationArms } from '../scripts/seed-arms';
+import { seedNotificationArms } from '../services/rdsa/seed-arms';
 
 const rdsa = new Hono();
 
