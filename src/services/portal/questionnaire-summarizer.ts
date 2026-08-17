@@ -63,7 +63,7 @@ export async function generateQuestionnaireAiSummary(
   const useDelta = Boolean(previousRow?.payloadJson);
 
   if (!isSummaryLlmConfigured()) {
-    if (useDelta) {
+    if (useDelta && previousRow) {
       const previousPayload = parsePayload(previousRow.payloadJson);
       const delta = buildCompactDailyDelta(payload, previousPayload);
       return buildFallbackDailyDelta(delta);
@@ -72,7 +72,7 @@ export async function generateQuestionnaireAiSummary(
   }
 
   try {
-    if (useDelta) {
+    if (useDelta && previousRow) {
       const previousPayload = parsePayload(previousRow.payloadJson);
       const delta = buildCompactDailyDelta(payload, previousPayload);
       return await generateGroqSummary('daily_delta', delta);

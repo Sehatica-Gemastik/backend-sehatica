@@ -28,11 +28,11 @@ function buildPtmInput(
   const daily = questionnaire;
 
   return {
-    age: asFiniteNumber(user.age),
-    sex: asFiniteNumber(user.sex),
-    race_ethnicity: asFiniteNumber(user.raceEthnicity),
-    education: asFiniteNumber(user.education),
-    income_poverty_ratio: asFiniteNumber(user.incomePovertyRatio),
+    age: asFiniteNumber(user.age) ?? undefined,
+    sex: asFiniteNumber(user.sex) ?? undefined,
+    race_ethnicity: asFiniteNumber(user.raceEthnicity) ?? undefined,
+    education: asFiniteNumber(user.education) ?? undefined,
+    income_poverty_ratio: asFiniteNumber(user.incomePovertyRatio) ?? undefined,
     calories_day1: asNonNegativeNumber(daily.calories_day1),
     protein_g_day1: asNonNegativeNumber(daily.protein_g_day1),
     carbohydrate_g_day1: asNonNegativeNumber(daily.carbohydrate_g_day1),

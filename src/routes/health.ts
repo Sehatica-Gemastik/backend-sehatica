@@ -30,7 +30,11 @@ health.use('*', authMiddleware);
 health.post('/daily-sync', async (c) => {
   try {
     const userId = c.get('userId') as number;
-    const body = await c.req.json() as Partial<DailySyncPayload>;
+    const body = await c.req.json() as Partial<DailySyncPayload> & {
+      ptmScores?: PtmScoresPayload;
+      questionnaire?: Record<string, unknown>;
+      weekly?: WeeklySyncPayload;
+    };
 
     if (!body.date || !/^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
       return errorResponse(c, 'Field date (YYYY-MM-DD) wajib diisi');

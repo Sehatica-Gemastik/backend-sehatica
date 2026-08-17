@@ -10,7 +10,7 @@ export interface AuthVariables {
   userRole: string;
 }
 
-export const authMiddleware: MiddlewareHandler = async (c, next) => {
+export const authMiddleware: MiddlewareHandler<{ Variables: AuthVariables }> = async (c, next) => {
   const authorization = c.req.header('Authorization');
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -41,7 +41,7 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
   }
 };
 
-export const doctorMiddleware: MiddlewareHandler = async (c, next) => {
+export const doctorMiddleware: MiddlewareHandler<{ Variables: AuthVariables }> = async (c, next) => {
   const role = c.get('userRole');
   if (role !== 'doctor' && role !== 'admin') {
     return c.json({ success: false, error: 'Forbidden: Doctor access required' }, 403);

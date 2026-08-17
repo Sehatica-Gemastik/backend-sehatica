@@ -42,5 +42,5 @@ export async function signRefreshToken(userId: number): Promise<string> {
 
 export async function verifyToken(token: string): Promise<JWTPayload> {
   const decoded = await verify(token, JWT_SECRET, 'HS256');
-  return decoded as JWTPayload;
+  return decoded as unknown as JWTPayload;
 }
